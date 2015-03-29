@@ -58,7 +58,7 @@ def decrypt(text, password):
   return result.decode('utf-8')
 
 
-def produce_cryptomissive(infile, outfile, key):
+def generate_cryptomissive(infile, outfile, key):
   with open(infile)               as f: plaintext    = f.read()
   with open("aes.js")             as f: aes          = f.read()
   with open("sha512.js")          as f: sha512       = f.read()
@@ -86,5 +86,5 @@ if __name__ == "__main__":
   outfile = sys.argv[2]
   key     = sys.argv[3]
   print("encrypting... {} ⇒ {}".format(infile, outfile))
-  produce_cryptomissive(infile, outfile, key)
+  generate_cryptomissive(infile, outfile, key)
   print("done")
