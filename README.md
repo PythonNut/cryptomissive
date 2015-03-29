@@ -19,7 +19,7 @@ Now, make your message. The format of the message is the `<body>` of an HTML doc
 ```bash
 $ emacs secret_message.html # wonderful magic happens here, BTW
 $ cat secret_message.html
-Yo dude. This message be secret.
+Yo dude. This message be <em>secret</em>.
 ```
 
 And finally, produce the _uber secret_ message of doom and destruction!
