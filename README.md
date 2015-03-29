@@ -29,3 +29,7 @@ $ python secret_message.html encrypted.html "this secret key shall never be gues
 encrypting secret_message.html ⇒ encrypted.html...
 done.
 ```
+
+And behold! Your new messenger of secrecy has come into being! Navigate to that file in any modern web browser and see for yourself.
+
+![screenshot](screenshot.png)
