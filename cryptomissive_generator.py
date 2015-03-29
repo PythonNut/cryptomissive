@@ -85,6 +85,6 @@ if __name__ == "__main__":
   infile  = sys.argv[1]
   outfile = sys.argv[2]
   key     = sys.argv[3]
-  print("encrypting... {} ⇒ {}".format(infile, outfile))
+  print("encrypting {} ⇒ {}...".format(infile, outfile))
   generate_cryptomissive(infile, outfile, key)
-  print("done")
+  print("done.")
