@@ -1,0 +1,199 @@
+<!doctype html>
+<!--
+    Hello fellow programmer.
+
+    If you came here thinking that my primitive terminology and simple UI
+    indicate my lack of Crypto skills, you are in for a bit of a surprise.
+
+    The message which you seek is encrypted with AES-512. The key is
+    generated via 9000 rounds of SHA-512. I have done my homework. This
+    pipeline is simple and bulletproof.
+
+    In short, you will not be getting the plaintext from this ciphertext
+    anytime soon. Not without the key, that is.
+
+    Cheers!
+    Jonathan
+  -->
+<html>
+  <head>
+    <title>CryptoMissive</title>
+    <meta charset="UTF-8">
+    <script src="sha512.js"></script>
+    <script src="aes.js"></script>
+    <script src="cryptoengine.js"></script>
+    <script type="text/data" id="password_form">
+      <style>
+        *{
+            font-family: "Calibri", "Dejavu Sans", "Helvetica";
+        }
+        body {
+            background: #2D353D;
+        }
+        #password_wrapper {
+        color: #D9E2EB;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #password_wrapper p{
+            text-align: center;
+        }
+        #progress, #password_form{
+            transition: 0.3s ease-in-out;
+            height: 1em;
+            display: block;
+        }
+        #progress[value="0"], #password_form p:empty{
+            opacity: 0;
+            height: 0;
+            margin-top: 0;
+        }
+        #progress {
+            margin-top: 1em;
+        }
+        #password_form, #progress {
+            display: table;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #password{
+            outline: none !important;
+            color: #D9E2EB;
+            background: hsl(210, 15%, 15%);
+            margin: 0;
+            border: none;
+            padding: 0.5em;
+            border-radius: 3px 0 0 3px;
+            margin-right: -5px;
+        }
+        #submit {
+            outline: none !important;
+            color: #D9E2EB;
+            background: hsl(210, 15%, 15%);
+            border: none;
+            padding: 0.5em;
+            border-radius: 0 3px 3px 0;
+            border-left: 2px solid #D9E2EB;
+        }
+        /* fix Firefox's extra padding */
+        button::-moz-focus-inner {
+            padding: 0;
+            border: 0;
+        }
+        #messages, #hash {
+            transition: 0.3s ease-in-out;
+        }
+        .fading_out {
+            opacity: 0;
+        }
+        .fading_in {
+            opacity: 1;
+        }
+        #hash.hash {
+            font-family: Consolas, "Dejavu Sans Mono", monospace;
+        }
+      </style>
+      <div id="password_wrapper">
+        <p id="hash">
+          This is a CryptoMissive.
+        </p>
+        <div id="password_form">
+        <input type="password" id="password" placeholder="password" onkeyup="if (event.keyCode == 13) crypto_loop()"/>
+        <button id="submit" onclick="crypto_loop()">decrypt</button>
+        </div>
+        <progress max="100" value="0" id="progress"></progress>
+        <p id="messages">
+          Please enter a password.
+        </p>
+      </div>
+    </script>
+    <script type="text/data" id="password_signature">
+      YxAVTzw07Q+1LEm9fKba2w7Yopy4nVrOa184It8mTcFGsY1YPCSF1jH0aKaaOTMV1MzbdnI7qF9Z8OjLka8VDQ==
+    </script>
+    <script type="text/data" id="ciphertext">
+      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
+      5s50OZj4I0CkZRosl88GmQ==
+    </script>
+  </head>
+  <body>
+    <p>This is a CryptoMissive.</p>
+    <p>You will need to do one of the following to read its contents:</p>
+    <ul>
+      <li>Enable JavaScript in your current browser</li>
+      <li>Switch to a browser that supports JavaScript</li>
+    </ul>
+  </body>
+</html>
