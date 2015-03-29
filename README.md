@@ -14,6 +14,8 @@ $ git clone https://github.com/PythonNut/cryptomissive
 $ cd cryptomissive
 ```
 
+You will need a working copy of `openssl`, `python3` and a web browser.
+
 Now, make your message. The format of the message is the `<body>` of an HTML document.
 
 ```bash
