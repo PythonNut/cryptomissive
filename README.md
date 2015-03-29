@@ -25,7 +25,7 @@ Yo dude. This message be <em>secret</em>.
 And finally, produce the _uber secret_ message of doom and destruction!
 
 ```bash
-$ python secret_message.html encrypted.html "this secret key shall never be guessed"
+$ python cryptomissive_generator.py secret_message.html encrypted.html "this secret key shall never be guessed"
 encrypting secret_message.html ⇒ encrypted.html...
 done.
 ```
