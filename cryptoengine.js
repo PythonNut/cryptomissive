@@ -3,6 +3,7 @@ function hash (text) {
   text = obj.getHash("SHA-512", "B64");
   return text;
 }
+
 function message_setter (message){
   var messages = document.getElementById("messages");
   messages.className = "fading_out";
