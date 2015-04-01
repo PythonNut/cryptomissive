@@ -4,6 +4,7 @@ import sys
 import subprocess
 
 def b64(text):
+  text = text.encode('utf-8')
   return base64.b64encode(base64.b16decode(text)).decode('utf-8')
 
 
