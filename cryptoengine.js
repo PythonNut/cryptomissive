@@ -13,12 +13,10 @@ function message_setter (message){
   }, 300);
 }
 
-function hashrounds (text, rounds, message, callback) {
+function hashrounds (text, rounds, callback) {
   var result = text, progress, progressbar, messages, hashviewer;
   var i = 0;
   progressbar = document.getElementById("progress");
-  messages = document.getElementById("messages");
-  message_setter(message);
 
   function doChunk () {
     progress = Math.ceil(i/rounds * 100);
@@ -37,25 +35,29 @@ function hashrounds (text, rounds, message, callback) {
 }
 
 function encrypt(text, password, callback) {
-  hashrounds(password, 9000, "Encrypting plaintext...", function (key){
+  message_setter("Encrypting plaintext...");
+  hashrounds(password, 9000, function (key){
     return callback(GibberishAES.enc(text, key));
   });
 }
 
 function decrypt(text, password, callback) {
-  hashrounds(password, 9000, "Password valid. Decrypting...", function (key) {
+  message_setter("Password valid. Decrypting...");
+  hashrounds(password, 9000, function (key) {
     return callback(GibberishAES.dec(text, key));
   });
 }
 
 function verify_key(password, checksum, callback) {
-  hashrounds(password, 10000, "Verifying password...", function (key) {
+  message_setter("Verifying password...");
+  hashrounds(password, 10000, function (key) {
     return callback(key == checksum);
   });
 }
 
 function make_checksum(password, callback) {
-  hashrounds(password, 10000,"Making checksum...", callback);
+  message_setter("Making checksum...");
+  hashrounds(password, 10000, callback);
 }
 
 var ciphertext;
