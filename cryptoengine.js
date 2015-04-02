@@ -63,18 +63,17 @@ function make_checksum(password, callback) {
   hashrounds(password, 10000,"Making checksum...", callback);
 }
 
-var body, ciphertext;
+var ciphertext;
 function main_loop() {
   var ciphertext_container;
-  body = document.getElementsByTagName("body")[0];
   ciphertext_container = document.getElementById("ciphertext");
   ciphertext = ciphertext_container.innerHTML.replace(/\s/g, "") ;
-  body.innerHTML = document.getElementById("password_form").innerHTML;
+  document.body.innerHTML = document.getElementById("password_form").innerHTML;
 }
 
 window.onload = main_loop;
 function crypto_loop (){
-  var upassword, checksum, progressbar, messages;
+  var password, checksum, progressbar, messages;
   password = document.getElementById("password").value.trim();
   checksum = document.getElementById("password_signature").innerHTML.trim();
 
@@ -83,7 +82,7 @@ function crypto_loop (){
   verify_key(password, checksum, function (result) {
     if (result) {
       decrypt(ciphertext,password, function (plaintext) {
-        body.innerHTML = plaintext;
+        document.body.innerHTML = plaintext;
       });
     } else {
       progressbar.value = 0;
