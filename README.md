@@ -19,15 +19,15 @@ You will need a working copy of `openssl`, `python3` and a web browser.
 Now, make your message. The format of the message is the `<body>` of an HTML document.
 
 ```bash
-$ emacs secret_message.html # wonderful magic happens here, BTW
-$ cat secret_message.html
+$ emacs plaintext.html # wonderful magic happens here, BTW
+$ cat plaintext.html
 Yo dude. This message be <em>secret</em>.
 ```
 
 And finally, produce the _uber secret_ message of doom and destruction!
 
 ```bash
-$ python cryptomissive_generator.py secret_message.html encrypted.html "this secret key shall never be guessed"
+$ python cryptomissive_generator.py plaintext.html ciphertext.html "this secret key shall never be guessed"
 encrypting secret_message.html ⇒ encrypted.html...
 done.
 ```
