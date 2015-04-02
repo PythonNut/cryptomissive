@@ -18,14 +18,11 @@ function hashrounds (text, rounds, message, callback) {
   var i = 0;
   progressbar = document.getElementById("progress");
   messages = document.getElementById("messages");
-  // hashviewer = document.getElementById("hash");
   message_setter(message);
 
   function doChunk () {
     progress = Math.ceil(i/rounds * 100);
     progressbar.value = progress;
-    // hashviewer.className = "hash";
-    // hashviewer.innerHTML = result.substring(1,32);
     for (var k = 0; k < 100; k++) {
       result = hash(result);
       i++;
@@ -33,8 +30,6 @@ function hashrounds (text, rounds, message, callback) {
     if (i < rounds) {
       setTimeout(doChunk,1);
     } else {
-      // hashviewer.className = "";
-      // hashviewer.innerHTML = "This is a CryptoMissive.";
       callback(result);
     }
   }
