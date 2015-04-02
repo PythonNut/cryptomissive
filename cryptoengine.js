@@ -14,8 +14,10 @@ function message_setter (message){
 }
 
 function hashrounds (text, rounds, callback) {
-  var result = text, progress, progressbar, messages, hashviewer;
-  var i = 0;
+  // here, "rounds" has a double meaning, as its value is rounded
+  // to the nearest hundred for performance reasons. Ha. Ha.
+
+  var result = text, i = 0, progress, progressbar, hashviewer;
   progressbar = document.getElementById("progress");
 
   function doChunk () {
