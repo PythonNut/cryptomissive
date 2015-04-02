@@ -1,4 +1,28 @@
-/**
+<!doctype html>
+<!--
+    Hello fellow programmer.
+
+    If you came here thinking that my primitive terminology and simple UI
+    indicate my lack of Crypto skills, you are in for a bit of a surprise.
+
+    The message which you seek is encrypted with AES-256. The key is
+    generated via 9000 rounds of SHA-512. I have done my homework. This
+    pipeline is simple and bulletproof.
+
+    In short, you will not be getting the plaintext from this ciphertext
+    anytime soon. Not without the key, that is.
+
+    Cheers!
+    PythonNut
+  -->
+<html>
+  <head>
+    <title>CryptoMissive</title>
+    <meta charset="UTF-8">
+    
+    
+<script>
+/*
 * @license Gibberish-AES 
 * A lightweight Javascript Libray for OpenSSL compatible AES CBC encryption.
 *
@@ -1236,7 +1260,33 @@ function makeFile(message, key)
     var messageInput = '';
     var checksum = make_checksum(key);
     var ciphertext = encrypt(plaintext, key);
-}<style>
+}
+<script type="text/data" id="password_form">
+</script>
+      <div id="password_form">
+    <input type="password" id="password" placeholder="password" onkeyup="if (event.keyCode == 13) crypto_loop()"/>
+    <button id="submit" onclick="crypto_loop()">decrypt</button>
+  </div>
+    </script>
+    <script type="text/data" id="password_signature">
+      {checksum}
+    </script>
+    <script type="text/data" id="ciphertext">
+      {ciphertext}
+    </script>
+  </head>
+  <body>
+    <p>This is a CryptoMissive.</p>
+    <p>You will need to do one of the following to read its contents:</p>
+    <ul>
+      <li>Enable JavaScript in your current browser</li>
+      <li>Switch to a browser that supports JavaScript</li>
+    </ul>
+
+
+<style>
+
+  
   *{
   font-family: "Calibri", "Dejavu Sans", "Helvetica";
   }
@@ -1312,12 +1362,12 @@ function makeFile(message, key)
   <p id="hash">
     This is a CryptoMissive.
   </p>
-  <div id="password_form">
-    <input type="password" id="password" placeholder="password" onkeyup="if (event.keyCode == 13) crypto_loop()"/>
-    <button id="submit" onclick="crypto_loop()">decrypt</button>
-  </div>
+  
   <progress max="100" value="0" id="progress"></progress>
   <p id="messages">
     Please enter a password.
   </p>
-</div>
+</div> 
+ </body>
+</html>
+
