@@ -91,9 +91,3 @@ function crypto_loop (){
     }
   });
 }
-function makeFile(message, key)
-{
-    var messageInput = '';
-    var checksum = make_checksum(key);
-    var ciphertext = encrypt(plaintext, key);
-}

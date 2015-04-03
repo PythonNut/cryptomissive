@@ -19,10 +19,132 @@
   <head>
     <title>CryptoMissive</title>
     <meta charset="UTF-8">
-    
-    
-<script>
+ <script>
 /*
+ A JavaScript implementation of the SHA family of hashes, as
+ defined in FIPS PUB 180-2 as well as the corresponding HMAC implementation
+ as defined in FIPS PUB 198a
+ Copyright Brian Turek 2008-2015
+ Distributed under the BSD License
+ See http://caligatio.github.com/jsSHA/ for more information
+ Several functions taken from Paul Johnston
+ */
+
+(function(K){function x(a,b,c){var f=0,g=[0],l="",h=null,l=c||"UTF8";if("UTF8"!==l&&"UTF16BE"!==l&&"UTF16LE"!==l)throw"encoding must be UTF8, UTF16BE, or UTF16LE";if("HEX"===b){if(0!==a.length%2)throw"srcString of HEX type must be in byte increments";h=z(a);f=h.binLen;g=h.value}else if("TEXT"===b)h=A(a,l),f=h.binLen,g=h.value;else if("B64"===b)h=B(a),f=h.binLen,g=h.value;else if("BYTES"===b)h=C(a),f=h.binLen,g=h.value;else throw"inputFormat must be HEX, TEXT, B64, or BYTES";this.getHash=function(a,
+b,c,l){var h=null,e=g.slice(),n=f,p;3===arguments.length?"number"!==typeof c&&(l=c,c=1):2===arguments.length&&(c=1);if(c!==parseInt(c,10)||1>c)throw"numRounds must a integer >= 1";switch(b){case "HEX":h=E;break;case "B64":h=F;break;case "BYTES":h=G;break;default:throw"format must be HEX, B64, or BYTES";}if("SHA-384"===a)for(p=0;p<c;p+=1)e=v(e,n,a),n=384;else if("SHA-512"===a)for(p=0;p<c;p+=1)e=v(e,n,a),n=512;else throw"Chosen SHA variant is not supported";return h(e,H(l))};this.getHMAC=function(a,
+b,c,h,m){var e,n,p,r,q=[],I=[];switch(h){case "HEX":h=E;break;case "B64":h=F;break;case "BYTES":h=G;break;default:throw"outputFormat must be HEX, B64, or BYTES";}if("SHA-384"===c)n=128,r=384;else if("SHA-512"===c)n=128,r=512;else throw"Chosen SHA variant is not supported";if("HEX"===b)e=z(a),p=e.binLen,e=e.value;else if("TEXT"===b)e=A(a,l),p=e.binLen,e=e.value;else if("B64"===b)e=B(a),p=e.binLen,e=e.value;else if("BYTES"===b)e=C(a),p=e.binLen,e=e.value;else throw"inputFormat must be HEX, TEXT, B64, or BYTES";
+a=8*n;b=n/4-1;if(n<p/8){for(e=v(e,p,c);e.length<=b;)e.push(0);e[b]&=4294967040}else if(n>p/8){for(;e.length<=b;)e.push(0);e[b]&=4294967040}for(n=0;n<=b;n+=1)q[n]=e[n]^909522486,I[n]=e[n]^1549556828;c=v(I.concat(v(q.concat(g),a+f,c)),a+r,c);return h(c,H(m))}}function m(a,b){this.a=a;this.b=b}function A(a,b){var c=[],f,g=[],l=0,h,t,m;if("UTF8"===b)for(h=0;h<a.length;h+=1)for(f=a.charCodeAt(h),g=[],128>f?g.push(f):2048>f?(g.push(192|f>>>6),g.push(128|f&63)):55296>f||57344<=f?g.push(224|f>>>12,128|f>>>
+6&63,128|f&63):(h+=1,f=65536+((f&1023)<<10|a.charCodeAt(h)&1023),g.push(240|f>>>18,128|f>>>12&63,128|f>>>6&63,128|f&63)),t=0;t<g.length;t+=1){for(m=l>>>2;c.length<=m;)c.push(0);c[m]|=g[t]<<24-l%4*8;l+=1}else if("UTF16BE"===b||"UTF16LE"===b)for(h=0;h<a.length;h+=1){f=a.charCodeAt(h);"UTF16LE"===b&&(t=f&255,f=t<<8|f>>8);for(m=l>>>2;c.length<=m;)c.push(0);c[m]|=f<<16-l%4*8;l+=2}return{value:c,binLen:8*l}}function z(a){var b=[],c=a.length,f,g,l;if(0!==c%2)throw"String of HEX type must be in byte increments";
+for(f=0;f<c;f+=2){g=parseInt(a.substr(f,2),16);if(isNaN(g))throw"String of HEX type contains invalid characters";for(l=f>>>3;b.length<=l;)b.push(0);b[f>>>3]|=g<<24-f%8*4}return{value:b,binLen:4*c}}function C(a){var b=[],c,f,g;for(f=0;f<a.length;f+=1)c=a.charCodeAt(f),g=f>>>2,b.length<=g&&b.push(0),b[g]|=c<<24-f%4*8;return{value:b,binLen:8*a.length}}function B(a){var b=[],c=0,f,g,l,h,m;if(-1===a.search(/^[a-zA-Z0-9=+\/]+$/))throw"Invalid character in base-64 string";g=a.indexOf("=");a=a.replace(/\=/g,
+"");if(-1!==g&&g<a.length)throw"Invalid '=' found in base-64 string";for(g=0;g<a.length;g+=4){m=a.substr(g,4);for(l=h=0;l<m.length;l+=1)f="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".indexOf(m[l]),h|=f<<18-6*l;for(l=0;l<m.length-1;l+=1){for(f=c>>>2;b.length<=f;)b.push(0);b[f]|=(h>>>16-8*l&255)<<24-c%4*8;c+=1}}return{value:b,binLen:8*c}}function E(a,b){var c="",f=4*a.length,g,l;for(g=0;g<f;g+=1)l=a[g>>>2]>>>8*(3-g%4),c+="0123456789abcdef".charAt(l>>>4&15)+"0123456789abcdef".charAt(l&
+15);return b.outputUpper?c.toUpperCase():c}function F(a,b){var c="",f=4*a.length,g,l,h;for(g=0;g<f;g+=3)for(h=g+1>>>2,l=a.length<=h?0:a[h],h=g+2>>>2,h=a.length<=h?0:a[h],h=(a[g>>>2]>>>8*(3-g%4)&255)<<16|(l>>>8*(3-(g+1)%4)&255)<<8|h>>>8*(3-(g+2)%4)&255,l=0;4>l;l+=1)c=8*g+6*l<=32*a.length?c+"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charAt(h>>>6*(3-l)&63):c+b.b64Pad;return c}function G(a){var b="",c=4*a.length,f,g;for(f=0;f<c;f+=1)g=a[f>>>2]>>>8*(3-f%4)&255,b+=String.fromCharCode(g);
+return b}function H(a){var b={outputUpper:!1,b64Pad:"="};try{a.hasOwnProperty("outputUpper")&&(b.outputUpper=a.outputUpper),a.hasOwnProperty("b64Pad")&&(b.b64Pad=a.b64Pad)}catch(c){}if("boolean"!==typeof b.outputUpper)throw"Invalid outputUpper formatting option";if("string"!==typeof b.b64Pad)throw"Invalid b64Pad formatting option";return b}function q(a,b){var c=null,c=new m(a.a,a.b);return 32>=b?new m(c.a>>>b|c.b<<32-b&4294967295,c.b>>>b|c.a<<32-b&4294967295):new m(c.b>>>b-32|c.a<<64-b&4294967295,
+c.a>>>b-32|c.b<<64-b&4294967295)}function J(a,b){return 32>=b?new m(a.a>>>b,a.b>>>b|a.a<<32-b&4294967295):new m(0,a.a>>>b-32)}function L(a,b,c){return new m(a.a&b.a^~a.a&c.a,a.b&b.b^~a.b&c.b)}function M(a,b,c){return new m(a.a&b.a^a.a&c.a^b.a&c.a,a.b&b.b^a.b&c.b^b.b&c.b)}function N(a){var b=q(a,28),c=q(a,34);a=q(a,39);return new m(b.a^c.a^a.a,b.b^c.b^a.b)}function O(a){var b=q(a,14),c=q(a,18);a=q(a,41);return new m(b.a^c.a^a.a,b.b^c.b^a.b)}function P(a){var b=q(a,1),c=q(a,8);a=J(a,7);return new m(b.a^
+c.a^a.a,b.b^c.b^a.b)}function Q(a){var b=q(a,19),c=q(a,61);a=J(a,6);return new m(b.a^c.a^a.a,b.b^c.b^a.b)}function R(a,b){var c,f,g;c=(a.b&65535)+(b.b&65535);f=(a.b>>>16)+(b.b>>>16)+(c>>>16);g=(f&65535)<<16|c&65535;c=(a.a&65535)+(b.a&65535)+(f>>>16);f=(a.a>>>16)+(b.a>>>16)+(c>>>16);return new m((f&65535)<<16|c&65535,g)}function S(a,b,c,f){var g,l,h;g=(a.b&65535)+(b.b&65535)+(c.b&65535)+(f.b&65535);l=(a.b>>>16)+(b.b>>>16)+(c.b>>>16)+(f.b>>>16)+(g>>>16);h=(l&65535)<<16|g&65535;g=(a.a&65535)+(b.a&65535)+
+(c.a&65535)+(f.a&65535)+(l>>>16);l=(a.a>>>16)+(b.a>>>16)+(c.a>>>16)+(f.a>>>16)+(g>>>16);return new m((l&65535)<<16|g&65535,h)}function T(a,b,c,f,g){var l,h,t;l=(a.b&65535)+(b.b&65535)+(c.b&65535)+(f.b&65535)+(g.b&65535);h=(a.b>>>16)+(b.b>>>16)+(c.b>>>16)+(f.b>>>16)+(g.b>>>16)+(l>>>16);t=(h&65535)<<16|l&65535;l=(a.a&65535)+(b.a&65535)+(c.a&65535)+(f.a&65535)+(g.a&65535)+(h>>>16);h=(a.a>>>16)+(b.a>>>16)+(c.a>>>16)+(f.a>>>16)+(g.a>>>16)+(l>>>16);return new m((h&65535)<<16|l&65535,t)}function v(a,b,c){var f,
+g,l,h,t,q,v,D,w,e,n,p,r,x,I,u,z,A,B,C,E,F,G,H,d,y=[],J,k=[1116352408,1899447441,3049323471,3921009573,961987163,1508970993,2453635748,2870763221,3624381080,310598401,607225278,1426881987,1925078388,2162078206,2614888103,3248222580,3835390401,4022224774,264347078,604807628,770255983,1249150122,1555081692,1996064986,2554220882,2821834349,2952996808,3210313671,3336571891,3584528711,113926993,338241895,666307205,773529912,1294757372,1396182291,1695183700,1986661051,2177026350,2456956037,2730485921,2820302411,
+3259730800,3345764771,3516065817,3600352804,4094571909,275423344,430227734,506948616,659060556,883997877,958139571,1322822218,1537002063,1747873779,1955562222,2024104815,2227730452,2361852424,2428436474,2756734187,3204031479,3329325298];e=[3238371032,914150663,812702999,4144912697,4290775857,1750603025,1694076839,3204075428];g=[1779033703,3144134277,1013904242,2773480762,1359893119,2600822924,528734635,1541459225];if("SHA-384"===c||"SHA-512"===c)n=80,f=(b+128>>>10<<5)+31,x=32,I=2,d=m,u=R,z=S,A=T,
+B=P,C=Q,E=N,F=O,H=M,G=L,k=[new d(k[0],3609767458),new d(k[1],602891725),new d(k[2],3964484399),new d(k[3],2173295548),new d(k[4],4081628472),new d(k[5],3053834265),new d(k[6],2937671579),new d(k[7],3664609560),new d(k[8],2734883394),new d(k[9],1164996542),new d(k[10],1323610764),new d(k[11],3590304994),new d(k[12],4068182383),new d(k[13],991336113),new d(k[14],633803317),new d(k[15],3479774868),new d(k[16],2666613458),new d(k[17],944711139),new d(k[18],2341262773),new d(k[19],2007800933),new d(k[20],
+1495990901),new d(k[21],1856431235),new d(k[22],3175218132),new d(k[23],2198950837),new d(k[24],3999719339),new d(k[25],766784016),new d(k[26],2566594879),new d(k[27],3203337956),new d(k[28],1034457026),new d(k[29],2466948901),new d(k[30],3758326383),new d(k[31],168717936),new d(k[32],1188179964),new d(k[33],1546045734),new d(k[34],1522805485),new d(k[35],2643833823),new d(k[36],2343527390),new d(k[37],1014477480),new d(k[38],1206759142),new d(k[39],344077627),new d(k[40],1290863460),new d(k[41],
+3158454273),new d(k[42],3505952657),new d(k[43],106217008),new d(k[44],3606008344),new d(k[45],1432725776),new d(k[46],1467031594),new d(k[47],851169720),new d(k[48],3100823752),new d(k[49],1363258195),new d(k[50],3750685593),new d(k[51],3785050280),new d(k[52],3318307427),new d(k[53],3812723403),new d(k[54],2003034995),new d(k[55],3602036899),new d(k[56],1575990012),new d(k[57],1125592928),new d(k[58],2716904306),new d(k[59],442776044),new d(k[60],593698344),new d(k[61],3733110249),new d(k[62],2999351573),
+new d(k[63],3815920427),new d(3391569614,3928383900),new d(3515267271,566280711),new d(3940187606,3454069534),new d(4118630271,4000239992),new d(116418474,1914138554),new d(174292421,2731055270),new d(289380356,3203993006),new d(460393269,320620315),new d(685471733,587496836),new d(852142971,1086792851),new d(1017036298,365543100),new d(1126000580,2618297676),new d(1288033470,3409855158),new d(1501505948,4234509866),new d(1607167915,987167468),new d(1816402316,1246189591)],e="SHA-384"===c?[new d(3418070365,
+e[0]),new d(1654270250,e[1]),new d(2438529370,e[2]),new d(355462360,e[3]),new d(1731405415,e[4]),new d(41048885895,e[5]),new d(3675008525,e[6]),new d(1203062813,e[7])]:[new d(g[0],4089235720),new d(g[1],2227873595),new d(g[2],4271175723),new d(g[3],1595750129),new d(g[4],2917565137),new d(g[5],725511199),new d(g[6],4215389547),new d(g[7],327033209)];else throw"Unexpected error in SHA-2 implementation";for(;a.length<=f;)a.push(0);a[b>>>5]|=128<<24-b%32;a[f]=b;J=a.length;for(p=0;p<J;p+=x){b=e[0];f=
+e[1];g=e[2];l=e[3];h=e[4];t=e[5];q=e[6];v=e[7];for(r=0;r<n;r+=1)16>r?(w=r*I+p,D=a.length<=w?0:a[w],w=a.length<=w+1?0:a[w+1],y[r]=new d(D,w)):y[r]=z(C(y[r-2]),y[r-7],B(y[r-15]),y[r-16]),D=A(v,F(h),G(h,t,q),k[r],y[r]),w=u(E(b),H(b,f,g)),v=q,q=t,t=h,h=u(l,D),l=g,g=f,f=b,b=u(D,w);e[0]=u(b,e[0]);e[1]=u(f,e[1]);e[2]=u(g,e[2]);e[3]=u(l,e[3]);e[4]=u(h,e[4]);e[5]=u(t,e[5]);e[6]=u(q,e[6]);e[7]=u(v,e[7])}if("SHA-384"===c)a=[e[0].a,e[0].b,e[1].a,e[1].b,e[2].a,e[2].b,e[3].a,e[3].b,e[4].a,e[4].b,e[5].a,e[5].b];
+else if("SHA-512"===c)a=[e[0].a,e[0].b,e[1].a,e[1].b,e[2].a,e[2].b,e[3].a,e[3].b,e[4].a,e[4].b,e[5].a,e[5].b,e[6].a,e[6].b,e[7].a,e[7].b];else throw"Unexpected error in SHA-2 implementation";return a}"function"===typeof define&&define.amd?define(function(){return x}):"undefined"!==typeof exports?"undefined"!==typeof module&&module.exports?module.exports=exports=x:exports=x:K.jsSHA=x})(this);
+function hash (text) {
+  var obj = new jsSHA(text, "TEXT");
+  text = obj.getHash("SHA-512", "B64");
+  return text;
+}
+
+function message_setter (message){
+  var messages = document.getElementById("messages");
+  messages.className = "fading_out";
+  setTimeout(function () {
+    messages.innerHTML = message;
+    messages.className = "fading_in";
+  }, 300);
+}
+
+function hashrounds (text, rounds, message, callback) {
+  var result = text, progress, progressbar, messages, hashviewer;
+  var i = 0;
+  progressbar = document.getElementById("progress");
+  messages = document.getElementById("messages");
+  // hashviewer = document.getElementById("hash");
+  message_setter(message);
+
+  function doChunk () {
+    progress = Math.ceil(i/rounds * 100);
+    progressbar.value = progress;
+    // hashviewer.className = "hash";
+    // hashviewer.innerHTML = result.substring(1,32);
+    for (var k = 0; k < 100; k++) {
+      result = hash(result);
+      i++;
+    }
+    if (i < rounds) {
+      setTimeout(doChunk,1);
+    } else {
+      // hashviewer.className = "";
+      // hashviewer.innerHTML = "This is a CryptoMissive.";
+      callback(result);
+    }
+  }
+  return doChunk();
+}
+
+function encrypt(text, password, callback) {
+  hashrounds(password, 9000, "Encrypting plaintext...", function (key){
+    return callback(GibberishAES.enc(text, key));
+  });
+}
+
+function decrypt(text, password, callback) {
+  hashrounds(password, 9000, "Password valid. Decrypting...", function (key) {
+    return callback(GibberishAES.dec(text, key));
+  });
+}
+
+function verify_key(password, checksum, callback) {
+  hashrounds(password, 10000, "Verifying password...", function (key) {
+    return callback(key == checksum);
+  });
+}
+
+function make_checksum(password, callback) {
+  hashrounds(password, 10000,"Making checksum...", callback);
+}
+
+var body, ciphertext;
+function main_loop() {
+  var ciphertext_container;
+  body = document.getElementsByTagName("body")[0];
+  ciphertext_container = document.getElementById("ciphertext");
+  ciphertext = ciphertext_container.innerHTML.replace(/\s/g, "") ;
+  body.innerHTML = document.getElementById("password_form").innerHTML;
+}
+
+window.onload = main_loop;
+function crypto_loop (){
+  var upassword, checksum, progressbar, messages;
+  password = document.getElementById("password").value.trim();
+  checksum = document.getElementById("password_signature").innerHTML.trim();
+
+  messages = document.getElementById("messages");
+  progressbar = document.getElementById("progress");
+  verify_key(password, checksum, function (result) {
+    if (result) {
+      decrypt(ciphertext,password, function (plaintext) {
+        document.innerHTML = plaintext;
+      });
+    } else {
+      progressbar.value = 0;
+      message_setter("Incorrect password. Please try again.");
+    }
+  });
+}
+/**
 * @license Gibberish-AES 
 * A lightweight Javascript Libray for OpenSSL compatible AES CBC encryption.
 *
@@ -42,1251 +164,27 @@
 * Outputs: AES Encrypted text encoded in Base64
 */
 
-
-(function (root, factory) {
-    if (typeof exports === 'object') {
-        // Node. 
-        module.exports = factory();
-    } else if (typeof define === 'function' && define["amd"]) {
-        // AMD. Register as an anonymous module.
-        define(factory);
-    } else {
-        // Browser globals (root is window)
-        root.GibberishAES = factory();
-    }
-}(this, function () {
-    'use strict';
-
-    var Nr = 14,
-    /* Default to 256 Bit Encryption */
-    Nk = 8,
-    Decrypt = false,
-
-    enc_utf8 = function(s)
-    {
-        try {
-            return unescape(encodeURIComponent(s));
-        }
-        catch(e) {
-            throw 'Error on UTF-8 encode';
-        }
-    },
-
-    dec_utf8 = function(s)
-    {
-        try {
-            return decodeURIComponent(escape(s));
-        }
-        catch(e) {
-            throw ('Bad Key');
-        }
-    },
-
-    padBlock = function(byteArr)
-    {
-        var array = [], cpad, i;
-        if (byteArr.length < 16) {
-            cpad = 16 - byteArr.length;
-            array = [cpad, cpad, cpad, cpad, cpad, cpad, cpad, cpad, cpad, cpad, cpad, cpad, cpad, cpad, cpad, cpad];
-        }
-        for (i = 0; i < byteArr.length; i++)
-        {
-            array[i] = byteArr[i];
-        }
-        return array;
-    },
-
-    block2s = function(block, lastBlock)
-    {
-        var string = '', padding, i;
-        if (lastBlock) {
-            padding = block[15];
-            if (padding > 16) {
-                throw ('Decryption error: Maybe bad key');
-            }
-            if (padding === 16) {
-                return '';
-            }
-            for (i = 0; i < 16 - padding; i++) {
-                string += String.fromCharCode(block[i]);
-            }
-        } else {
-            for (i = 0; i < 16; i++) {
-                string += String.fromCharCode(block[i]);
-            }
-        }
-        return string;
-    },
-
-    a2h = function(numArr)
-    {
-        var string = '', i;
-        for (i = 0; i < numArr.length; i++) {
-            string += (numArr[i] < 16 ? '0': '') + numArr[i].toString(16);
-        }
-        return string;
-    },
-
-    h2a = function(s)
-    {
-        var ret = [];
-        s.replace(/(..)/g,
-        function(s) {
-            ret.push(parseInt(s, 16));
-        });
-        return ret;
-    },
-
-    s2a = function(string, binary) {
-        var array = [], i;
-
-        if (! binary) {
-            string = enc_utf8(string);
-        }
-
-        for (i = 0; i < string.length; i++)
-        {
-            array[i] = string.charCodeAt(i);
-        }
-
-        return array;
-    },
-
-    size = function(newsize)
-    {
-        switch (newsize)
-        {
-        case 128:
-            Nr = 10;
-            Nk = 4;
-            break;
-        case 192:
-            Nr = 12;
-            Nk = 6;
-            break;
-        case 256:
-            Nr = 14;
-            Nk = 8;
-            break;
-        default:
-            throw ('Invalid Key Size Specified:' + newsize);
-        }
-    },
-
-    randArr = function(num) {
-        var result = [], i;
-        for (i = 0; i < num; i++) {
-            result = result.concat(Math.floor(Math.random() * 256));
-        }
-        return result;
-    },
-
-    openSSLKey = function(passwordArr, saltArr) {
-        // Number of rounds depends on the size of the AES in use
-        // 3 rounds for 256
-        //        2 rounds for the key, 1 for the IV
-        // 2 rounds for 128
-        //        1 round for the key, 1 round for the IV
-        // 3 rounds for 192 since it's not evenly divided by 128 bits
-        var rounds = Nr >= 12 ? 3: 2,
-        key = [],
-        iv = [],
-        md5_hash = [],
-        result = [],
-        data00 = passwordArr.concat(saltArr),
-        i;
-        md5_hash[0] = MD5(data00);
-        result = md5_hash[0];
-        for (i = 1; i < rounds; i++) {
-            md5_hash[i] = MD5(md5_hash[i - 1].concat(data00));
-            result = result.concat(md5_hash[i]);
-        }
-        key = result.slice(0, 4 * Nk);
-        iv = result.slice(4 * Nk, 4 * Nk + 16);
-        return {
-            key: key,
-            iv: iv
-        };
-    },
-
-    rawEncrypt = function(plaintext, key, iv) {
-        // plaintext, key and iv as byte arrays
-        key = expandKey(key);
-        var numBlocks = Math.ceil(plaintext.length / 16),
-        blocks = [],
-        i,
-        cipherBlocks = [];
-        for (i = 0; i < numBlocks; i++) {
-            blocks[i] = padBlock(plaintext.slice(i * 16, i * 16 + 16));
-        }
-        if (plaintext.length % 16 === 0) {
-            blocks.push([16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16]);
-            // CBC OpenSSL padding scheme
-            numBlocks++;
-        }
-        for (i = 0; i < blocks.length; i++) {
-            blocks[i] = (i === 0) ? xorBlocks(blocks[i], iv) : xorBlocks(blocks[i], cipherBlocks[i - 1]);
-            cipherBlocks[i] = encryptBlock(blocks[i], key);
-        }
-        return cipherBlocks;
-    },
-
-    rawDecrypt = function(cryptArr, key, iv, binary) {
-        //  cryptArr, key and iv as byte arrays
-        key = expandKey(key);
-        var numBlocks = cryptArr.length / 16,
-        cipherBlocks = [],
-        i,
-        plainBlocks = [],
-        string = '';
-        for (i = 0; i < numBlocks; i++) {
-            cipherBlocks.push(cryptArr.slice(i * 16, (i + 1) * 16));
-        }
-        for (i = cipherBlocks.length - 1; i >= 0; i--) {
-            plainBlocks[i] = decryptBlock(cipherBlocks[i], key);
-            plainBlocks[i] = (i === 0) ? xorBlocks(plainBlocks[i], iv) : xorBlocks(plainBlocks[i], cipherBlocks[i - 1]);
-        }
-        for (i = 0; i < numBlocks - 1; i++) {
-            string += block2s(plainBlocks[i], false);
-        }
-        string += block2s(plainBlocks[i], true);
-        return binary ? string : dec_utf8(string); 
-    },
-
-    encryptBlock = function(block, words) {
-        Decrypt = false;
-        var state = addRoundKey(block, words, 0),
-        round;
-        for (round = 1; round < (Nr + 1); round++) {
-            state = subBytes(state);
-            state = shiftRows(state);
-            if (round < Nr) {
-                state = mixColumns(state);
-            }
-            //last round? don't mixColumns
-            state = addRoundKey(state, words, round);
-        }
-
-        return state;
-    },
-
-    decryptBlock = function(block, words) {
-        Decrypt = true;
-        var state = addRoundKey(block, words, Nr),
-        round;
-        for (round = Nr - 1; round > -1; round--) {
-            state = shiftRows(state);
-            state = subBytes(state);
-            state = addRoundKey(state, words, round);
-            if (round > 0) {
-                state = mixColumns(state);
-            }
-            //last round? don't mixColumns
-        }
-
-        return state;
-    },
-
-    subBytes = function(state) {
-        var S = Decrypt ? SBoxInv: SBox,
-        temp = [],
-        i;
-        for (i = 0; i < 16; i++) {
-            temp[i] = S[state[i]];
-        }
-        return temp;
-    },
-
-    shiftRows = function(state) {
-        var temp = [],
-        shiftBy = Decrypt ? [0, 13, 10, 7, 4, 1, 14, 11, 8, 5, 2, 15, 12, 9, 6, 3] : [0, 5, 10, 15, 4, 9, 14, 3, 8, 13, 2, 7, 12, 1, 6, 11],
-        i;
-        for (i = 0; i < 16; i++) {
-            temp[i] = state[shiftBy[i]];
-        }
-        return temp;
-    },
-
-    mixColumns = function(state) {
-        var t = [],
-        c;
-        if (!Decrypt) {
-            for (c = 0; c < 4; c++) {
-                t[c * 4] = G2X[state[c * 4]] ^ G3X[state[1 + c * 4]] ^ state[2 + c * 4] ^ state[3 + c * 4];
-                t[1 + c * 4] = state[c * 4] ^ G2X[state[1 + c * 4]] ^ G3X[state[2 + c * 4]] ^ state[3 + c * 4];
-                t[2 + c * 4] = state[c * 4] ^ state[1 + c * 4] ^ G2X[state[2 + c * 4]] ^ G3X[state[3 + c * 4]];
-                t[3 + c * 4] = G3X[state[c * 4]] ^ state[1 + c * 4] ^ state[2 + c * 4] ^ G2X[state[3 + c * 4]];
-            }
-        }else {
-            for (c = 0; c < 4; c++) {
-                t[c*4] = GEX[state[c*4]] ^ GBX[state[1+c*4]] ^ GDX[state[2+c*4]] ^ G9X[state[3+c*4]];
-                t[1+c*4] = G9X[state[c*4]] ^ GEX[state[1+c*4]] ^ GBX[state[2+c*4]] ^ GDX[state[3+c*4]];
-                t[2+c*4] = GDX[state[c*4]] ^ G9X[state[1+c*4]] ^ GEX[state[2+c*4]] ^ GBX[state[3+c*4]];
-                t[3+c*4] = GBX[state[c*4]] ^ GDX[state[1+c*4]] ^ G9X[state[2+c*4]] ^ GEX[state[3+c*4]];
-            }
-        }
-        
-        return t;
-    },
-
-    addRoundKey = function(state, words, round) {
-        var temp = [],
-        i;
-        for (i = 0; i < 16; i++) {
-            temp[i] = state[i] ^ words[round][i];
-        }
-        return temp;
-    },
-
-    xorBlocks = function(block1, block2) {
-        var temp = [],
-        i;
-        for (i = 0; i < 16; i++) {
-            temp[i] = block1[i] ^ block2[i];
-        }
-        return temp;
-    },
-
-    expandKey = function(key) {
-        // Expects a 1d number array
-        var w = [],
-        temp = [],
-        i,
-        r,
-        t,
-        flat = [],
-        j;
-
-        for (i = 0; i < Nk; i++) {
-            r = [key[4 * i], key[4 * i + 1], key[4 * i + 2], key[4 * i + 3]];
-            w[i] = r;
-        }
-
-        for (i = Nk; i < (4 * (Nr + 1)); i++) {
-            w[i] = [];
-            for (t = 0; t < 4; t++) {
-                temp[t] = w[i - 1][t];
-            }
-            if (i % Nk === 0) {
-                temp = subWord(rotWord(temp));
-                temp[0] ^= Rcon[i / Nk - 1];
-            } else if (Nk > 6 && i % Nk === 4) {
-                temp = subWord(temp);
-            }
-            for (t = 0; t < 4; t++) {
-                w[i][t] = w[i - Nk][t] ^ temp[t];
-            }
-        }
-        for (i = 0; i < (Nr + 1); i++) {
-            flat[i] = [];
-            for (j = 0; j < 4; j++) {
-                flat[i].push(w[i * 4 + j][0], w[i * 4 + j][1], w[i * 4 + j][2], w[i * 4 + j][3]);
-            }
-        }
-        return flat;
-    },
-
-    subWord = function(w) {
-        // apply SBox to 4-byte word w
-        for (var i = 0; i < 4; i++) {
-            w[i] = SBox[w[i]];
-        }
-        return w;
-    },
-
-    rotWord = function(w) {
-        // rotate 4-byte word w left by one byte
-        var tmp = w[0],
-        i;
-        for (i = 0; i < 3; i++) {
-            w[i] = w[i + 1];
-        }
-        w[3] = tmp;
-        return w;
-    },
-
-// jlcooke: 2012-07-12: added strhex + invertArr to compress G2X/G3X/G9X/GBX/GEX/SBox/SBoxInv/Rcon saving over 7KB, and added encString, decString
-    strhex = function(str,size) {
-        var i, ret = [];
-        for (i=0; i<str.length; i+=size){
-            ret[i/size] = parseInt(str.substr(i,size), 16);
-        }
-        return ret;
-    },
-    invertArr = function(arr) {
-        var i, ret = [];
-        for (i=0; i<arr.length; i++){
-            ret[arr[i]] = i;
-        }
-        return ret;
-    },
-    Gxx = function(a, b) {
-        var i, ret;
-
-        ret = 0;
-        for (i=0; i<8; i++) {
-            ret = ((b&1)===1) ? ret^a : ret;
-            /* xmult */
-            a = (a>0x7f) ? 0x11b^(a<<1) : (a<<1);
-            b >>>= 1;
-        }
-
-        return ret;
-    },
-    Gx = function(x) {
-        var i, r = [];
-        for (i=0; i<256; i++){
-            r[i] = Gxx(x, i);
-        }
-        return r;
-    },
-
-    // S-box
-/*
-    SBox = [
-    99, 124, 119, 123, 242, 107, 111, 197, 48, 1, 103, 43, 254, 215, 171,
-    118, 202, 130, 201, 125, 250, 89, 71, 240, 173, 212, 162, 175, 156, 164,
-    114, 192, 183, 253, 147, 38, 54, 63, 247, 204, 52, 165, 229, 241, 113,
-    216, 49, 21, 4, 199, 35, 195, 24, 150, 5, 154, 7, 18, 128, 226,
-    235, 39, 178, 117, 9, 131, 44, 26, 27, 110, 90, 160, 82, 59, 214,
-    179, 41, 227, 47, 132, 83, 209, 0, 237, 32, 252, 177, 91, 106, 203,
-    190, 57, 74, 76, 88, 207, 208, 239, 170, 251, 67, 77, 51, 133, 69,
-    249, 2, 127, 80, 60, 159, 168, 81, 163, 64, 143, 146, 157, 56, 245,
-    188, 182, 218, 33, 16, 255, 243, 210, 205, 12, 19, 236, 95, 151, 68,
-    23, 196, 167, 126, 61, 100, 93, 25, 115, 96, 129, 79, 220, 34, 42,
-    144, 136, 70, 238, 184, 20, 222, 94, 11, 219, 224, 50, 58, 10, 73,
-    6, 36, 92, 194, 211, 172, 98, 145, 149, 228, 121, 231, 200, 55, 109,
-    141, 213, 78, 169, 108, 86, 244, 234, 101, 122, 174, 8, 186, 120, 37,
-    46, 28, 166, 180, 198, 232, 221, 116, 31, 75, 189, 139, 138, 112, 62,
-    181, 102, 72, 3, 246, 14, 97, 53, 87, 185, 134, 193, 29, 158, 225,
-    248, 152, 17, 105, 217, 142, 148, 155, 30, 135, 233, 206, 85, 40, 223,
-    140, 161, 137, 13, 191, 230, 66, 104, 65, 153, 45, 15, 176, 84, 187,
-    22], //*/ SBox = strhex('637c777bf26b6fc53001672bfed7ab76ca82c97dfa5947f0add4a2af9ca472c0b7fd9326363ff7cc34a5e5f171d8311504c723c31896059a071280e2eb27b27509832c1a1b6e5aa0523bd6b329e32f8453d100ed20fcb15b6acbbe394a4c58cfd0efaafb434d338545f9027f503c9fa851a3408f929d38f5bcb6da2110fff3d2cd0c13ec5f974417c4a77e3d645d197360814fdc222a908846eeb814de5e0bdbe0323a0a4906245cc2d3ac629195e479e7c8376d8dd54ea96c56f4ea657aae08ba78252e1ca6b4c6e8dd741f4bbd8b8a703eb5664803f60e613557b986c11d9ee1f8981169d98e949b1e87e9ce5528df8ca1890dbfe6426841992d0fb054bb16',2),
-
-    // Precomputed lookup table for the inverse SBox
-/*    SBoxInv = [
-    82, 9, 106, 213, 48, 54, 165, 56, 191, 64, 163, 158, 129, 243, 215,
-    251, 124, 227, 57, 130, 155, 47, 255, 135, 52, 142, 67, 68, 196, 222,
-    233, 203, 84, 123, 148, 50, 166, 194, 35, 61, 238, 76, 149, 11, 66,
-    250, 195, 78, 8, 46, 161, 102, 40, 217, 36, 178, 118, 91, 162, 73,
-    109, 139, 209, 37, 114, 248, 246, 100, 134, 104, 152, 22, 212, 164, 92,
-    204, 93, 101, 182, 146, 108, 112, 72, 80, 253, 237, 185, 218, 94, 21,
-    70, 87, 167, 141, 157, 132, 144, 216, 171, 0, 140, 188, 211, 10, 247,
-    228, 88, 5, 184, 179, 69, 6, 208, 44, 30, 143, 202, 63, 15, 2,
-    193, 175, 189, 3, 1, 19, 138, 107, 58, 145, 17, 65, 79, 103, 220,
-    234, 151, 242, 207, 206, 240, 180, 230, 115, 150, 172, 116, 34, 231, 173,
-    53, 133, 226, 249, 55, 232, 28, 117, 223, 110, 71, 241, 26, 113, 29,
-    41, 197, 137, 111, 183, 98, 14, 170, 24, 190, 27, 252, 86, 62, 75,
-    198, 210, 121, 32, 154, 219, 192, 254, 120, 205, 90, 244, 31, 221, 168,
-    51, 136, 7, 199, 49, 177, 18, 16, 89, 39, 128, 236, 95, 96, 81,
-    127, 169, 25, 181, 74, 13, 45, 229, 122, 159, 147, 201, 156, 239, 160,
-    224, 59, 77, 174, 42, 245, 176, 200, 235, 187, 60, 131, 83, 153, 97,
-    23, 43, 4, 126, 186, 119, 214, 38, 225, 105, 20, 99, 85, 33, 12,
-    125], //*/ SBoxInv = invertArr(SBox),
-
-    // Rijndael Rcon
-/*
-    Rcon = [1, 2, 4, 8, 16, 32, 64, 128, 27, 54, 108, 216, 171, 77, 154, 47, 94,
-    188, 99, 198, 151, 53, 106, 212, 179, 125, 250, 239, 197, 145],
-//*/ Rcon = strhex('01020408102040801b366cd8ab4d9a2f5ebc63c697356ad4b37dfaefc591',2),
-
-/*
-    G2X = [
-    0x00, 0x02, 0x04, 0x06, 0x08, 0x0a, 0x0c, 0x0e, 0x10, 0x12, 0x14, 0x16,
-    0x18, 0x1a, 0x1c, 0x1e, 0x20, 0x22, 0x24, 0x26, 0x28, 0x2a, 0x2c, 0x2e,
-    0x30, 0x32, 0x34, 0x36, 0x38, 0x3a, 0x3c, 0x3e, 0x40, 0x42, 0x44, 0x46,
-    0x48, 0x4a, 0x4c, 0x4e, 0x50, 0x52, 0x54, 0x56, 0x58, 0x5a, 0x5c, 0x5e,
-    0x60, 0x62, 0x64, 0x66, 0x68, 0x6a, 0x6c, 0x6e, 0x70, 0x72, 0x74, 0x76,
-    0x78, 0x7a, 0x7c, 0x7e, 0x80, 0x82, 0x84, 0x86, 0x88, 0x8a, 0x8c, 0x8e,
-    0x90, 0x92, 0x94, 0x96, 0x98, 0x9a, 0x9c, 0x9e, 0xa0, 0xa2, 0xa4, 0xa6,
-    0xa8, 0xaa, 0xac, 0xae, 0xb0, 0xb2, 0xb4, 0xb6, 0xb8, 0xba, 0xbc, 0xbe,
-    0xc0, 0xc2, 0xc4, 0xc6, 0xc8, 0xca, 0xcc, 0xce, 0xd0, 0xd2, 0xd4, 0xd6,
-    0xd8, 0xda, 0xdc, 0xde, 0xe0, 0xe2, 0xe4, 0xe6, 0xe8, 0xea, 0xec, 0xee,
-    0xf0, 0xf2, 0xf4, 0xf6, 0xf8, 0xfa, 0xfc, 0xfe, 0x1b, 0x19, 0x1f, 0x1d,
-    0x13, 0x11, 0x17, 0x15, 0x0b, 0x09, 0x0f, 0x0d, 0x03, 0x01, 0x07, 0x05,
-    0x3b, 0x39, 0x3f, 0x3d, 0x33, 0x31, 0x37, 0x35, 0x2b, 0x29, 0x2f, 0x2d,
-    0x23, 0x21, 0x27, 0x25, 0x5b, 0x59, 0x5f, 0x5d, 0x53, 0x51, 0x57, 0x55,
-    0x4b, 0x49, 0x4f, 0x4d, 0x43, 0x41, 0x47, 0x45, 0x7b, 0x79, 0x7f, 0x7d,
-    0x73, 0x71, 0x77, 0x75, 0x6b, 0x69, 0x6f, 0x6d, 0x63, 0x61, 0x67, 0x65,
-    0x9b, 0x99, 0x9f, 0x9d, 0x93, 0x91, 0x97, 0x95, 0x8b, 0x89, 0x8f, 0x8d,
-    0x83, 0x81, 0x87, 0x85, 0xbb, 0xb9, 0xbf, 0xbd, 0xb3, 0xb1, 0xb7, 0xb5,
-    0xab, 0xa9, 0xaf, 0xad, 0xa3, 0xa1, 0xa7, 0xa5, 0xdb, 0xd9, 0xdf, 0xdd,
-    0xd3, 0xd1, 0xd7, 0xd5, 0xcb, 0xc9, 0xcf, 0xcd, 0xc3, 0xc1, 0xc7, 0xc5,
-    0xfb, 0xf9, 0xff, 0xfd, 0xf3, 0xf1, 0xf7, 0xf5, 0xeb, 0xe9, 0xef, 0xed,
-    0xe3, 0xe1, 0xe7, 0xe5
-    ], //*/ G2X = Gx(2),
-
-/*    G3X = [
-    0x00, 0x03, 0x06, 0x05, 0x0c, 0x0f, 0x0a, 0x09, 0x18, 0x1b, 0x1e, 0x1d,
-    0x14, 0x17, 0x12, 0x11, 0x30, 0x33, 0x36, 0x35, 0x3c, 0x3f, 0x3a, 0x39,
-    0x28, 0x2b, 0x2e, 0x2d, 0x24, 0x27, 0x22, 0x21, 0x60, 0x63, 0x66, 0x65,
-    0x6c, 0x6f, 0x6a, 0x69, 0x78, 0x7b, 0x7e, 0x7d, 0x74, 0x77, 0x72, 0x71,
-    0x50, 0x53, 0x56, 0x55, 0x5c, 0x5f, 0x5a, 0x59, 0x48, 0x4b, 0x4e, 0x4d,
-    0x44, 0x47, 0x42, 0x41, 0xc0, 0xc3, 0xc6, 0xc5, 0xcc, 0xcf, 0xca, 0xc9,
-    0xd8, 0xdb, 0xde, 0xdd, 0xd4, 0xd7, 0xd2, 0xd1, 0xf0, 0xf3, 0xf6, 0xf5,
-    0xfc, 0xff, 0xfa, 0xf9, 0xe8, 0xeb, 0xee, 0xed, 0xe4, 0xe7, 0xe2, 0xe1,
-    0xa0, 0xa3, 0xa6, 0xa5, 0xac, 0xaf, 0xaa, 0xa9, 0xb8, 0xbb, 0xbe, 0xbd,
-    0xb4, 0xb7, 0xb2, 0xb1, 0x90, 0x93, 0x96, 0x95, 0x9c, 0x9f, 0x9a, 0x99,
-    0x88, 0x8b, 0x8e, 0x8d, 0x84, 0x87, 0x82, 0x81, 0x9b, 0x98, 0x9d, 0x9e,
-    0x97, 0x94, 0x91, 0x92, 0x83, 0x80, 0x85, 0x86, 0x8f, 0x8c, 0x89, 0x8a,
-    0xab, 0xa8, 0xad, 0xae, 0xa7, 0xa4, 0xa1, 0xa2, 0xb3, 0xb0, 0xb5, 0xb6,
-    0xbf, 0xbc, 0xb9, 0xba, 0xfb, 0xf8, 0xfd, 0xfe, 0xf7, 0xf4, 0xf1, 0xf2,
-    0xe3, 0xe0, 0xe5, 0xe6, 0xef, 0xec, 0xe9, 0xea, 0xcb, 0xc8, 0xcd, 0xce,
-    0xc7, 0xc4, 0xc1, 0xc2, 0xd3, 0xd0, 0xd5, 0xd6, 0xdf, 0xdc, 0xd9, 0xda,
-    0x5b, 0x58, 0x5d, 0x5e, 0x57, 0x54, 0x51, 0x52, 0x43, 0x40, 0x45, 0x46,
-    0x4f, 0x4c, 0x49, 0x4a, 0x6b, 0x68, 0x6d, 0x6e, 0x67, 0x64, 0x61, 0x62,
-    0x73, 0x70, 0x75, 0x76, 0x7f, 0x7c, 0x79, 0x7a, 0x3b, 0x38, 0x3d, 0x3e,
-    0x37, 0x34, 0x31, 0x32, 0x23, 0x20, 0x25, 0x26, 0x2f, 0x2c, 0x29, 0x2a,
-    0x0b, 0x08, 0x0d, 0x0e, 0x07, 0x04, 0x01, 0x02, 0x13, 0x10, 0x15, 0x16,
-    0x1f, 0x1c, 0x19, 0x1a
-    ], //*/ G3X = Gx(3),
-
-/*
-    G9X = [
-    0x00, 0x09, 0x12, 0x1b, 0x24, 0x2d, 0x36, 0x3f, 0x48, 0x41, 0x5a, 0x53,
-    0x6c, 0x65, 0x7e, 0x77, 0x90, 0x99, 0x82, 0x8b, 0xb4, 0xbd, 0xa6, 0xaf,
-    0xd8, 0xd1, 0xca, 0xc3, 0xfc, 0xf5, 0xee, 0xe7, 0x3b, 0x32, 0x29, 0x20,
-    0x1f, 0x16, 0x0d, 0x04, 0x73, 0x7a, 0x61, 0x68, 0x57, 0x5e, 0x45, 0x4c,
-    0xab, 0xa2, 0xb9, 0xb0, 0x8f, 0x86, 0x9d, 0x94, 0xe3, 0xea, 0xf1, 0xf8,
-    0xc7, 0xce, 0xd5, 0xdc, 0x76, 0x7f, 0x64, 0x6d, 0x52, 0x5b, 0x40, 0x49,
-    0x3e, 0x37, 0x2c, 0x25, 0x1a, 0x13, 0x08, 0x01, 0xe6, 0xef, 0xf4, 0xfd,
-    0xc2, 0xcb, 0xd0, 0xd9, 0xae, 0xa7, 0xbc, 0xb5, 0x8a, 0x83, 0x98, 0x91,
-    0x4d, 0x44, 0x5f, 0x56, 0x69, 0x60, 0x7b, 0x72, 0x05, 0x0c, 0x17, 0x1e,
-    0x21, 0x28, 0x33, 0x3a, 0xdd, 0xd4, 0xcf, 0xc6, 0xf9, 0xf0, 0xeb, 0xe2,
-    0x95, 0x9c, 0x87, 0x8e, 0xb1, 0xb8, 0xa3, 0xaa, 0xec, 0xe5, 0xfe, 0xf7,
-    0xc8, 0xc1, 0xda, 0xd3, 0xa4, 0xad, 0xb6, 0xbf, 0x80, 0x89, 0x92, 0x9b,
-    0x7c, 0x75, 0x6e, 0x67, 0x58, 0x51, 0x4a, 0x43, 0x34, 0x3d, 0x26, 0x2f,
-    0x10, 0x19, 0x02, 0x0b, 0xd7, 0xde, 0xc5, 0xcc, 0xf3, 0xfa, 0xe1, 0xe8,
-    0x9f, 0x96, 0x8d, 0x84, 0xbb, 0xb2, 0xa9, 0xa0, 0x47, 0x4e, 0x55, 0x5c,
-    0x63, 0x6a, 0x71, 0x78, 0x0f, 0x06, 0x1d, 0x14, 0x2b, 0x22, 0x39, 0x30,
-    0x9a, 0x93, 0x88, 0x81, 0xbe, 0xb7, 0xac, 0xa5, 0xd2, 0xdb, 0xc0, 0xc9,
-    0xf6, 0xff, 0xe4, 0xed, 0x0a, 0x03, 0x18, 0x11, 0x2e, 0x27, 0x3c, 0x35,
-    0x42, 0x4b, 0x50, 0x59, 0x66, 0x6f, 0x74, 0x7d, 0xa1, 0xa8, 0xb3, 0xba,
-    0x85, 0x8c, 0x97, 0x9e, 0xe9, 0xe0, 0xfb, 0xf2, 0xcd, 0xc4, 0xdf, 0xd6,
-    0x31, 0x38, 0x23, 0x2a, 0x15, 0x1c, 0x07, 0x0e, 0x79, 0x70, 0x6b, 0x62,
-    0x5d, 0x54, 0x4f, 0x46
-    ], //*/ G9X = Gx(9),
-
-/*    GBX = [
-    0x00, 0x0b, 0x16, 0x1d, 0x2c, 0x27, 0x3a, 0x31, 0x58, 0x53, 0x4e, 0x45,
-    0x74, 0x7f, 0x62, 0x69, 0xb0, 0xbb, 0xa6, 0xad, 0x9c, 0x97, 0x8a, 0x81,
-    0xe8, 0xe3, 0xfe, 0xf5, 0xc4, 0xcf, 0xd2, 0xd9, 0x7b, 0x70, 0x6d, 0x66,
-    0x57, 0x5c, 0x41, 0x4a, 0x23, 0x28, 0x35, 0x3e, 0x0f, 0x04, 0x19, 0x12,
-    0xcb, 0xc0, 0xdd, 0xd6, 0xe7, 0xec, 0xf1, 0xfa, 0x93, 0x98, 0x85, 0x8e,
-    0xbf, 0xb4, 0xa9, 0xa2, 0xf6, 0xfd, 0xe0, 0xeb, 0xda, 0xd1, 0xcc, 0xc7,
-    0xae, 0xa5, 0xb8, 0xb3, 0x82, 0x89, 0x94, 0x9f, 0x46, 0x4d, 0x50, 0x5b,
-    0x6a, 0x61, 0x7c, 0x77, 0x1e, 0x15, 0x08, 0x03, 0x32, 0x39, 0x24, 0x2f,
-    0x8d, 0x86, 0x9b, 0x90, 0xa1, 0xaa, 0xb7, 0xbc, 0xd5, 0xde, 0xc3, 0xc8,
-    0xf9, 0xf2, 0xef, 0xe4, 0x3d, 0x36, 0x2b, 0x20, 0x11, 0x1a, 0x07, 0x0c,
-    0x65, 0x6e, 0x73, 0x78, 0x49, 0x42, 0x5f, 0x54, 0xf7, 0xfc, 0xe1, 0xea,
-    0xdb, 0xd0, 0xcd, 0xc6, 0xaf, 0xa4, 0xb9, 0xb2, 0x83, 0x88, 0x95, 0x9e,
-    0x47, 0x4c, 0x51, 0x5a, 0x6b, 0x60, 0x7d, 0x76, 0x1f, 0x14, 0x09, 0x02,
-    0x33, 0x38, 0x25, 0x2e, 0x8c, 0x87, 0x9a, 0x91, 0xa0, 0xab, 0xb6, 0xbd,
-    0xd4, 0xdf, 0xc2, 0xc9, 0xf8, 0xf3, 0xee, 0xe5, 0x3c, 0x37, 0x2a, 0x21,
-    0x10, 0x1b, 0x06, 0x0d, 0x64, 0x6f, 0x72, 0x79, 0x48, 0x43, 0x5e, 0x55,
-    0x01, 0x0a, 0x17, 0x1c, 0x2d, 0x26, 0x3b, 0x30, 0x59, 0x52, 0x4f, 0x44,
-    0x75, 0x7e, 0x63, 0x68, 0xb1, 0xba, 0xa7, 0xac, 0x9d, 0x96, 0x8b, 0x80,
-    0xe9, 0xe2, 0xff, 0xf4, 0xc5, 0xce, 0xd3, 0xd8, 0x7a, 0x71, 0x6c, 0x67,
-    0x56, 0x5d, 0x40, 0x4b, 0x22, 0x29, 0x34, 0x3f, 0x0e, 0x05, 0x18, 0x13,
-    0xca, 0xc1, 0xdc, 0xd7, 0xe6, 0xed, 0xf0, 0xfb, 0x92, 0x99, 0x84, 0x8f,
-    0xbe, 0xb5, 0xa8, 0xa3
-    ], //*/ GBX = Gx(0xb),
-
-/*
-    GDX = [
-    0x00, 0x0d, 0x1a, 0x17, 0x34, 0x39, 0x2e, 0x23, 0x68, 0x65, 0x72, 0x7f,
-    0x5c, 0x51, 0x46, 0x4b, 0xd0, 0xdd, 0xca, 0xc7, 0xe4, 0xe9, 0xfe, 0xf3,
-    0xb8, 0xb5, 0xa2, 0xaf, 0x8c, 0x81, 0x96, 0x9b, 0xbb, 0xb6, 0xa1, 0xac,
-    0x8f, 0x82, 0x95, 0x98, 0xd3, 0xde, 0xc9, 0xc4, 0xe7, 0xea, 0xfd, 0xf0,
-    0x6b, 0x66, 0x71, 0x7c, 0x5f, 0x52, 0x45, 0x48, 0x03, 0x0e, 0x19, 0x14,
-    0x37, 0x3a, 0x2d, 0x20, 0x6d, 0x60, 0x77, 0x7a, 0x59, 0x54, 0x43, 0x4e,
-    0x05, 0x08, 0x1f, 0x12, 0x31, 0x3c, 0x2b, 0x26, 0xbd, 0xb0, 0xa7, 0xaa,
-    0x89, 0x84, 0x93, 0x9e, 0xd5, 0xd8, 0xcf, 0xc2, 0xe1, 0xec, 0xfb, 0xf6,
-    0xd6, 0xdb, 0xcc, 0xc1, 0xe2, 0xef, 0xf8, 0xf5, 0xbe, 0xb3, 0xa4, 0xa9,
-    0x8a, 0x87, 0x90, 0x9d, 0x06, 0x0b, 0x1c, 0x11, 0x32, 0x3f, 0x28, 0x25,
-    0x6e, 0x63, 0x74, 0x79, 0x5a, 0x57, 0x40, 0x4d, 0xda, 0xd7, 0xc0, 0xcd,
-    0xee, 0xe3, 0xf4, 0xf9, 0xb2, 0xbf, 0xa8, 0xa5, 0x86, 0x8b, 0x9c, 0x91,
-    0x0a, 0x07, 0x10, 0x1d, 0x3e, 0x33, 0x24, 0x29, 0x62, 0x6f, 0x78, 0x75,
-    0x56, 0x5b, 0x4c, 0x41, 0x61, 0x6c, 0x7b, 0x76, 0x55, 0x58, 0x4f, 0x42,
-    0x09, 0x04, 0x13, 0x1e, 0x3d, 0x30, 0x27, 0x2a, 0xb1, 0xbc, 0xab, 0xa6,
-    0x85, 0x88, 0x9f, 0x92, 0xd9, 0xd4, 0xc3, 0xce, 0xed, 0xe0, 0xf7, 0xfa,
-    0xb7, 0xba, 0xad, 0xa0, 0x83, 0x8e, 0x99, 0x94, 0xdf, 0xd2, 0xc5, 0xc8,
-    0xeb, 0xe6, 0xf1, 0xfc, 0x67, 0x6a, 0x7d, 0x70, 0x53, 0x5e, 0x49, 0x44,
-    0x0f, 0x02, 0x15, 0x18, 0x3b, 0x36, 0x21, 0x2c, 0x0c, 0x01, 0x16, 0x1b,
-    0x38, 0x35, 0x22, 0x2f, 0x64, 0x69, 0x7e, 0x73, 0x50, 0x5d, 0x4a, 0x47,
-    0xdc, 0xd1, 0xc6, 0xcb, 0xe8, 0xe5, 0xf2, 0xff, 0xb4, 0xb9, 0xae, 0xa3,
-    0x80, 0x8d, 0x9a, 0x97
-    ], //*/ GDX = Gx(0xd),
-
-/*
-    GEX = [
-    0x00, 0x0e, 0x1c, 0x12, 0x38, 0x36, 0x24, 0x2a, 0x70, 0x7e, 0x6c, 0x62,
-    0x48, 0x46, 0x54, 0x5a, 0xe0, 0xee, 0xfc, 0xf2, 0xd8, 0xd6, 0xc4, 0xca,
-    0x90, 0x9e, 0x8c, 0x82, 0xa8, 0xa6, 0xb4, 0xba, 0xdb, 0xd5, 0xc7, 0xc9,
-    0xe3, 0xed, 0xff, 0xf1, 0xab, 0xa5, 0xb7, 0xb9, 0x93, 0x9d, 0x8f, 0x81,
-    0x3b, 0x35, 0x27, 0x29, 0x03, 0x0d, 0x1f, 0x11, 0x4b, 0x45, 0x57, 0x59,
-    0x73, 0x7d, 0x6f, 0x61, 0xad, 0xa3, 0xb1, 0xbf, 0x95, 0x9b, 0x89, 0x87,
-    0xdd, 0xd3, 0xc1, 0xcf, 0xe5, 0xeb, 0xf9, 0xf7, 0x4d, 0x43, 0x51, 0x5f,
-    0x75, 0x7b, 0x69, 0x67, 0x3d, 0x33, 0x21, 0x2f, 0x05, 0x0b, 0x19, 0x17,
-    0x76, 0x78, 0x6a, 0x64, 0x4e, 0x40, 0x52, 0x5c, 0x06, 0x08, 0x1a, 0x14,
-    0x3e, 0x30, 0x22, 0x2c, 0x96, 0x98, 0x8a, 0x84, 0xae, 0xa0, 0xb2, 0xbc,
-    0xe6, 0xe8, 0xfa, 0xf4, 0xde, 0xd0, 0xc2, 0xcc, 0x41, 0x4f, 0x5d, 0x53,
-    0x79, 0x77, 0x65, 0x6b, 0x31, 0x3f, 0x2d, 0x23, 0x09, 0x07, 0x15, 0x1b,
-    0xa1, 0xaf, 0xbd, 0xb3, 0x99, 0x97, 0x85, 0x8b, 0xd1, 0xdf, 0xcd, 0xc3,
-    0xe9, 0xe7, 0xf5, 0xfb, 0x9a, 0x94, 0x86, 0x88, 0xa2, 0xac, 0xbe, 0xb0,
-    0xea, 0xe4, 0xf6, 0xf8, 0xd2, 0xdc, 0xce, 0xc0, 0x7a, 0x74, 0x66, 0x68,
-    0x42, 0x4c, 0x5e, 0x50, 0x0a, 0x04, 0x16, 0x18, 0x32, 0x3c, 0x2e, 0x20,
-    0xec, 0xe2, 0xf0, 0xfe, 0xd4, 0xda, 0xc8, 0xc6, 0x9c, 0x92, 0x80, 0x8e,
-    0xa4, 0xaa, 0xb8, 0xb6, 0x0c, 0x02, 0x10, 0x1e, 0x34, 0x3a, 0x28, 0x26,
-    0x7c, 0x72, 0x60, 0x6e, 0x44, 0x4a, 0x58, 0x56, 0x37, 0x39, 0x2b, 0x25,
-    0x0f, 0x01, 0x13, 0x1d, 0x47, 0x49, 0x5b, 0x55, 0x7f, 0x71, 0x63, 0x6d,
-    0xd7, 0xd9, 0xcb, 0xc5, 0xef, 0xe1, 0xf3, 0xfd, 0xa7, 0xa9, 0xbb, 0xb5,
-    0x9f, 0x91, 0x83, 0x8d
-    ], //*/ GEX = Gx(0xe),
-
-    enc = function(string, pass, binary) {
-        // string, password in plaintext
-        var salt = randArr(8),
-        pbe = openSSLKey(s2a(pass, binary), salt),
-        key = pbe.key,
-        iv = pbe.iv,
-        cipherBlocks,
-        saltBlock = [[83, 97, 108, 116, 101, 100, 95, 95].concat(salt)];
-        string = s2a(string, binary);
-        cipherBlocks = rawEncrypt(string, key, iv);
-        // Spells out 'Salted__'
-        cipherBlocks = saltBlock.concat(cipherBlocks);
-        return Base64.encode(cipherBlocks);
-    },
-
-    dec = function(string, pass, binary) {
-        // string, password in plaintext
-        var cryptArr = Base64.decode(string),
-        salt = cryptArr.slice(8, 16),
-        pbe = openSSLKey(s2a(pass, binary), salt),
-        key = pbe.key,
-        iv = pbe.iv;
-        cryptArr = cryptArr.slice(16, cryptArr.length);
-        // Take off the Salted__ffeeddcc
-        string = rawDecrypt(cryptArr, key, iv, binary);
-        return string;
-    },
+(function(t,q){"object"===typeof exports?module.exports=q():"function"===typeof define&&define.amd?define(q):t.GibberishAES=q()})(this,function(){var t=14,q=8,u=!1,L=function(a,d){var b="",c,e;if(d){c=a[15];if(16<c)throw"Decryption error: Maybe bad key";if(16===c)return"";for(e=0;e<16-c;e++)b+=String.fromCharCode(a[e])}else for(e=0;16>e;e++)b+=String.fromCharCode(a[e]);return b},w=function(a,d){var b=[],c;if(!d)try{a=unescape(encodeURIComponent(a))}catch(e){throw"Error on UTF-8 encode";}for(c=0;c<
+a.length;c++)b[c]=a.charCodeAt(c);return b},G=function(a,d){var b=12<=t?3:2,c=[],e=[],c=[],e=[],p=a.concat(d),m;c[0]=F(p);e=c[0];for(m=1;m<b;m++)c[m]=F(c[m-1].concat(p)),e=e.concat(c[m]);c=e.slice(0,4*q);e=e.slice(4*q,4*q+16);return{key:c,iv:e}},N=function(a,d,b){d=H(d);var c=Math.ceil(a.length/16),e=[],p,m=[];for(p=0;p<c;p++){var l=p,q=a.slice(16*p,16*p+16),t=[],r=void 0,r=void 0;16>q.length&&(r=16-q.length,t=[r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r]);for(r=0;r<q.length;r++)t[r]=q[r];e[l]=t}0===a.length%
+16&&e.push([16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16]);for(p=0;p<e.length;p++)e[p]=0===p?x(e[p],b):x(e[p],m[p-1]),m[p]=M(e[p],d);return m},P=function(a,d,b,c){d=H(d);var e=a.length/16,p=[],m,l=[],q="";for(m=0;m<e;m++)p.push(a.slice(16*m,16*(m+1)));for(m=p.length-1;0<=m;m--)l[m]=O(p[m],d),l[m]=0===m?x(l[m],b):x(l[m],p[m-1]);for(m=0;m<e-1;m++)q+=L(l[m],!1);var q=q+L(l[m],!0),t;if(c)t=q;else try{t=decodeURIComponent(escape(q))}catch(r){throw"Bad Key";}return t},M=function(a,d){u=!1;var b=y(a,
+d,0),c;for(c=1;c<t+1;c++)b=Q(b),b=R(b),c<t&&(b=S(b)),b=y(b,d,c);return b},O=function(a,d){u=!0;var b=y(a,d,t),c;for(c=t-1;-1<c;c--)b=R(b),b=Q(b),b=y(b,d,c),0<c&&(b=S(b));return b},Q=function(a){var d=u?U:I,b=[],c;for(c=0;16>c;c++)b[c]=d[a[c]];return b},R=function(a){var d=[],b=u?[0,13,10,7,4,1,14,11,8,5,2,15,12,9,6,3]:[0,5,10,15,4,9,14,3,8,13,2,7,12,1,6,11],c;for(c=0;16>c;c++)d[c]=a[b[c]];return d},S=function(a){var d=[],b;if(u)for(b=0;4>b;b++)d[4*b]=z[a[4*b]]^A[a[1+4*b]]^B[a[2+4*b]]^C[a[3+4*b]],
+d[1+4*b]=C[a[4*b]]^z[a[1+4*b]]^A[a[2+4*b]]^B[a[3+4*b]],d[2+4*b]=B[a[4*b]]^C[a[1+4*b]]^z[a[2+4*b]]^A[a[3+4*b]],d[3+4*b]=A[a[4*b]]^B[a[1+4*b]]^C[a[2+4*b]]^z[a[3+4*b]];else for(b=0;4>b;b++)d[4*b]=D[a[4*b]]^E[a[1+4*b]]^a[2+4*b]^a[3+4*b],d[1+4*b]=a[4*b]^D[a[1+4*b]]^E[a[2+4*b]]^a[3+4*b],d[2+4*b]=a[4*b]^a[1+4*b]^D[a[2+4*b]]^E[a[3+4*b]],d[3+4*b]=E[a[4*b]]^a[1+4*b]^a[2+4*b]^D[a[3+4*b]];return d},y=function(a,d,b){var c=[],e;for(e=0;16>e;e++)c[e]=a[e]^d[b][e];return c},x=function(a,d){var b=[],c;for(c=0;16>
+c;c++)b[c]=a[c]^d[c];return b},H=function(a){var d=[],b=[],c,e,p=[];for(c=0;c<q;c++)e=[a[4*c],a[4*c+1],a[4*c+2],a[4*c+3]],d[c]=e;for(c=q;c<4*(t+1);c++){d[c]=[];for(a=0;4>a;a++)b[a]=d[c-1][a];if(0===c%q){a=b[0];e=void 0;for(e=0;3>e;e++)b[e]=b[e+1];b[3]=a;b=T(b);b[0]^=V[c/q-1]}else 6<q&&4===c%q&&(b=T(b));for(a=0;4>a;a++)d[c][a]=d[c-q][a]^b[a]}for(c=0;c<t+1;c++)for(p[c]=[],b=0;4>b;b++)p[c].push(d[4*c+b][0],d[4*c+b][1],d[4*c+b][2],d[4*c+b][3]);return p},T=function(a){for(var d=0;4>d;d++)a[d]=I[a[d]];
+return a},J=function(a,d){var b,c=[];for(b=0;b<a.length;b+=d)c[b/d]=parseInt(a.substr(b,d),16);return c},v=function(a){var d,b=[];for(d=0;256>d;d++){for(var c=d,e=a,p=d,m=void 0,l=void 0,m=l=0;8>m;m++)l=1===(p&1)?l^e:l,e=127<e?283^e<<1:e<<1,p>>>=1;b[c]=l}return b},I=J("637c777bf26b6fc53001672bfed7ab76ca82c97dfa5947f0add4a2af9ca472c0b7fd9326363ff7cc34a5e5f171d8311504c723c31896059a071280e2eb27b27509832c1a1b6e5aa0523bd6b329e32f8453d100ed20fcb15b6acbbe394a4c58cfd0efaafb434d338545f9027f503c9fa851a3408f929d38f5bcb6da2110fff3d2cd0c13ec5f974417c4a77e3d645d197360814fdc222a908846eeb814de5e0bdbe0323a0a4906245cc2d3ac629195e479e7c8376d8dd54ea96c56f4ea657aae08ba78252e1ca6b4c6e8dd741f4bbd8b8a703eb5664803f60e613557b986c11d9ee1f8981169d98e949b1e87e9ce5528df8ca1890dbfe6426841992d0fb054bb16",
+2),U=function(a){var d,b=[];for(d=0;d<a.length;d++)b[a[d]]=d;return b}(I),V=J("01020408102040801b366cd8ab4d9a2f5ebc63c697356ad4b37dfaefc591",2),D=v(2),E=v(3),C=v(9),A=v(11),B=v(13),z=v(14),F=function(a){function d(a,b){var c,d,e,f,g;e=a&2147483648;f=b&2147483648;c=a&1073741824;d=b&1073741824;g=(a&1073741823)+(b&1073741823);return c&d?g^2147483648^e^f:c|d?g&1073741824?g^3221225472^e^f:g^1073741824^e^f:g^e^f}function b(a,b,c,e,g,f,h){a=d(a,d(d(b&c|~b&e,g),h));return d(a<<f|a>>>32-f,b)}function c(a,
+b,c,e,f,g,h){a=d(a,d(d(b&e|c&~e,f),h));return d(a<<g|a>>>32-g,b)}function e(a,b,c,e,g,f,h){a=d(a,d(d(b^c^e,g),h));return d(a<<f|a>>>32-f,b)}function p(a,b,c,e,f,g,h){a=d(a,d(d(c^(b|~e),f),h));return d(a<<g|a>>>32-g,b)}function m(a){var b,c,e=[];for(c=0;3>=c;c++)b=a>>>8*c&255,e=e.concat(b);return e}var l=[],q,t,r,u,f,g,h,k,n=J("67452301efcdab8998badcfe10325476d76aa478e8c7b756242070dbc1bdceeef57c0faf4787c62aa8304613fd469501698098d88b44f7afffff5bb1895cd7be6b901122fd987193a679438e49b40821f61e2562c040b340265e5a51e9b6c7aad62f105d02441453d8a1e681e7d3fbc821e1cde6c33707d6f4d50d87455a14eda9e3e905fcefa3f8676f02d98d2a4c8afffa39428771f6816d9d6122fde5380ca4beea444bdecfa9f6bb4b60bebfbc70289b7ec6eaa127fad4ef308504881d05d9d4d039e6db99e51fa27cf8c4ac5665f4292244432aff97ab9423a7fc93a039655b59c38f0ccc92ffeff47d85845dd16fa87e4ffe2ce6e0a30143144e0811a1f7537e82bd3af2352ad7d2bbeb86d391",
+8),l=function(a){var b,c=a.length;b=c+8;for(var e=16*((b-b%64)/64+1),d=[],g=0,f=0;f<c;)b=(f-f%4)/4,g=f%4*8,d[b]|=a[f]<<g,f++;b=(f-f%4)/4;d[b]|=128<<f%4*8;d[e-2]=c<<3;d[e-1]=c>>>29;return d}(a);f=n[0];g=n[1];h=n[2];k=n[3];for(a=0;a<l.length;a+=16)q=f,t=g,r=h,u=k,f=b(f,g,h,k,l[a+0],7,n[4]),k=b(k,f,g,h,l[a+1],12,n[5]),h=b(h,k,f,g,l[a+2],17,n[6]),g=b(g,h,k,f,l[a+3],22,n[7]),f=b(f,g,h,k,l[a+4],7,n[8]),k=b(k,f,g,h,l[a+5],12,n[9]),h=b(h,k,f,g,l[a+6],17,n[10]),g=b(g,h,k,f,l[a+7],22,n[11]),f=b(f,g,h,k,l[a+
+8],7,n[12]),k=b(k,f,g,h,l[a+9],12,n[13]),h=b(h,k,f,g,l[a+10],17,n[14]),g=b(g,h,k,f,l[a+11],22,n[15]),f=b(f,g,h,k,l[a+12],7,n[16]),k=b(k,f,g,h,l[a+13],12,n[17]),h=b(h,k,f,g,l[a+14],17,n[18]),g=b(g,h,k,f,l[a+15],22,n[19]),f=c(f,g,h,k,l[a+1],5,n[20]),k=c(k,f,g,h,l[a+6],9,n[21]),h=c(h,k,f,g,l[a+11],14,n[22]),g=c(g,h,k,f,l[a+0],20,n[23]),f=c(f,g,h,k,l[a+5],5,n[24]),k=c(k,f,g,h,l[a+10],9,n[25]),h=c(h,k,f,g,l[a+15],14,n[26]),g=c(g,h,k,f,l[a+4],20,n[27]),f=c(f,g,h,k,l[a+9],5,n[28]),k=c(k,f,g,h,l[a+14],9,
+n[29]),h=c(h,k,f,g,l[a+3],14,n[30]),g=c(g,h,k,f,l[a+8],20,n[31]),f=c(f,g,h,k,l[a+13],5,n[32]),k=c(k,f,g,h,l[a+2],9,n[33]),h=c(h,k,f,g,l[a+7],14,n[34]),g=c(g,h,k,f,l[a+12],20,n[35]),f=e(f,g,h,k,l[a+5],4,n[36]),k=e(k,f,g,h,l[a+8],11,n[37]),h=e(h,k,f,g,l[a+11],16,n[38]),g=e(g,h,k,f,l[a+14],23,n[39]),f=e(f,g,h,k,l[a+1],4,n[40]),k=e(k,f,g,h,l[a+4],11,n[41]),h=e(h,k,f,g,l[a+7],16,n[42]),g=e(g,h,k,f,l[a+10],23,n[43]),f=e(f,g,h,k,l[a+13],4,n[44]),k=e(k,f,g,h,l[a+0],11,n[45]),h=e(h,k,f,g,l[a+3],16,n[46]),
+g=e(g,h,k,f,l[a+6],23,n[47]),f=e(f,g,h,k,l[a+9],4,n[48]),k=e(k,f,g,h,l[a+12],11,n[49]),h=e(h,k,f,g,l[a+15],16,n[50]),g=e(g,h,k,f,l[a+2],23,n[51]),f=p(f,g,h,k,l[a+0],6,n[52]),k=p(k,f,g,h,l[a+7],10,n[53]),h=p(h,k,f,g,l[a+14],15,n[54]),g=p(g,h,k,f,l[a+5],21,n[55]),f=p(f,g,h,k,l[a+12],6,n[56]),k=p(k,f,g,h,l[a+3],10,n[57]),h=p(h,k,f,g,l[a+10],15,n[58]),g=p(g,h,k,f,l[a+1],21,n[59]),f=p(f,g,h,k,l[a+8],6,n[60]),k=p(k,f,g,h,l[a+15],10,n[61]),h=p(h,k,f,g,l[a+6],15,n[62]),g=p(g,h,k,f,l[a+13],21,n[63]),f=p(f,
+g,h,k,l[a+4],6,n[64]),k=p(k,f,g,h,l[a+11],10,n[65]),h=p(h,k,f,g,l[a+2],15,n[66]),g=p(g,h,k,f,l[a+9],21,n[67]),f=d(f,q),g=d(g,t),h=d(h,r),k=d(k,u);return m(f).concat(m(g),m(h),m(k))},K=function(){var a="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",d=a.split("");"function"===typeof Array.indexOf&&(a=d);return{encode:function(a,c){var e=[],p="",m;for(m=0;m<16*a.length;m++)e.push(a[Math.floor(m/16)][m%16]);for(m=0;m<e.length;m+=3)p+=d[e[m]>>2],p+=d[(e[m]&3)<<4|e[m+1]>>4],p=void 0!==
+e[m+1]?p+d[(e[m+1]&15)<<2|e[m+2]>>6]:p+"=",p=void 0!==e[m+2]?p+d[e[m+2]&63]:p+"=";e=p.slice(0,64)+"\n";for(m=1;m<Math.ceil(p.length/64);m++)e+=p.slice(64*m,64*m+64)+(Math.ceil(p.length/64)===m+1?"":"\n");return e},decode:function(b){b=b.replace(/\n/g,"");var c=[],e=[],d=[],m;for(m=0;m<b.length;m+=4)e[0]=a.indexOf(b.charAt(m)),e[1]=a.indexOf(b.charAt(m+1)),e[2]=a.indexOf(b.charAt(m+2)),e[3]=a.indexOf(b.charAt(m+3)),d[0]=e[0]<<2|e[1]>>4,d[1]=(e[1]&15)<<4|e[2]>>2,d[2]=(e[2]&3)<<6|e[3],c.push(d[0],d[1],
+d[2]);return c=c.slice(0,c.length-c.length%16)}}}();return{size:function(a){switch(a){case 128:t=10;q=4;break;case 192:t=12;q=6;break;case 256:t=14;q=8;break;default:throw"Invalid Key Size Specified:"+a;}},h2a:function(a){var d=[];a.replace(/(..)/g,function(a){d.push(parseInt(a,16))});return d},expandKey:H,encryptBlock:M,decryptBlock:O,Decrypt:u,s2a:w,rawEncrypt:N,rawDecrypt:P,dec:function(a,d,b){a=K.decode(a);var c=a.slice(8,16),c=G(w(d,b),c);d=c.key;c=c.iv;a=a.slice(16,a.length);return a=P(a,d,
+c,b)},openSSLKey:G,a2h:function(a){var d="",b;for(b=0;b<a.length;b++)d+=(16>a[b]?"0":"")+a[b].toString(16);return d},enc:function(a,d,b){var c;c=[];var e;for(e=0;8>e;e++)c=c.concat(Math.floor(256*Math.random()));e=G(w(d,b),c);d=e.key;e=e.iv;c=[[83,97,108,116,101,100,95,95].concat(c)];a=w(a,b);a=N(a,d,e);a=c.concat(a);return K.encode(a)},Hash:{MD5:F},Base64:K}});
+</script>   
     
-    MD5 = function(numArr) {
-
-        function rotateLeft(lValue, iShiftBits) {
-            return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
-        }
-
-        function addUnsigned(lX, lY) {
-            var lX4,
-            lY4,
-            lX8,
-            lY8,
-            lResult;
-            lX8 = (lX & 0x80000000);
-            lY8 = (lY & 0x80000000);
-            lX4 = (lX & 0x40000000);
-            lY4 = (lY & 0x40000000);
-            lResult = (lX & 0x3FFFFFFF) + (lY & 0x3FFFFFFF);
-            if (lX4 & lY4) {
-                return (lResult ^ 0x80000000 ^ lX8 ^ lY8);
-            }
-            if (lX4 | lY4) {
-                if (lResult & 0x40000000) {
-                    return (lResult ^ 0xC0000000 ^ lX8 ^ lY8);
-                } else {
-                    return (lResult ^ 0x40000000 ^ lX8 ^ lY8);
-                }
-            } else {
-                return (lResult ^ lX8 ^ lY8);
-            }
-        }
-
-        function f(x, y, z) {
-            return (x & y) | ((~x) & z);
-        }
-        function g(x, y, z) {
-            return (x & z) | (y & (~z));
-        }
-        function h(x, y, z) {
-            return (x ^ y ^ z);
-        }
-        function funcI(x, y, z) {
-            return (y ^ (x | (~z)));
-        }
-
-        function ff(a, b, c, d, x, s, ac) {
-            a = addUnsigned(a, addUnsigned(addUnsigned(f(b, c, d), x), ac));
-            return addUnsigned(rotateLeft(a, s), b);
-        }
-
-        function gg(a, b, c, d, x, s, ac) {
-            a = addUnsigned(a, addUnsigned(addUnsigned(g(b, c, d), x), ac));
-            return addUnsigned(rotateLeft(a, s), b);
-        }
-
-        function hh(a, b, c, d, x, s, ac) {
-            a = addUnsigned(a, addUnsigned(addUnsigned(h(b, c, d), x), ac));
-            return addUnsigned(rotateLeft(a, s), b);
-        }
-
-        function ii(a, b, c, d, x, s, ac) {
-            a = addUnsigned(a, addUnsigned(addUnsigned(funcI(b, c, d), x), ac));
-            return addUnsigned(rotateLeft(a, s), b);
-        }
-
-        function convertToWordArray(numArr) {
-            var lWordCount,
-            lMessageLength = numArr.length,
-            lNumberOfWords_temp1 = lMessageLength + 8,
-            lNumberOfWords_temp2 = (lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64)) / 64,
-            lNumberOfWords = (lNumberOfWords_temp2 + 1) * 16,
-            lWordArray = [],
-            lBytePosition = 0,
-            lByteCount = 0;
-            while (lByteCount < lMessageLength) {
-                lWordCount = (lByteCount - (lByteCount % 4)) / 4;
-                lBytePosition = (lByteCount % 4) * 8;
-                lWordArray[lWordCount] = (lWordArray[lWordCount] | (numArr[lByteCount] << lBytePosition));
-                lByteCount++;
-            }
-            lWordCount = (lByteCount - (lByteCount % 4)) / 4;
-            lBytePosition = (lByteCount % 4) * 8;
-            lWordArray[lWordCount] = lWordArray[lWordCount] | (0x80 << lBytePosition);
-            lWordArray[lNumberOfWords - 2] = lMessageLength << 3;
-            lWordArray[lNumberOfWords - 1] = lMessageLength >>> 29;
-            return lWordArray;
-        }
-
-        function wordToHex(lValue) {
-            var lByte,
-            lCount,
-            wordToHexArr = [];
-            for (lCount = 0; lCount <= 3; lCount++) {
-                lByte = (lValue >>> (lCount * 8)) & 255;
-                wordToHexArr = wordToHexArr.concat(lByte);
-             }
-            return wordToHexArr;
-        }
-
-        /*function utf8Encode(string) {
-            string = string.replace(/\r\n/g, "\n");
-            var utftext = "",
-            n,
-            c;
-
-            for (n = 0; n < string.length; n++) {
-
-                c = string.charCodeAt(n);
-
-                if (c < 128) {
-                    utftext += String.fromCharCode(c);
-                }
-                else if ((c > 127) && (c < 2048)) {
-                    utftext += String.fromCharCode((c >> 6) | 192);
-                    utftext += String.fromCharCode((c & 63) | 128);
-                }
-                else {
-                    utftext += String.fromCharCode((c >> 12) | 224);
-                    utftext += String.fromCharCode(((c >> 6) & 63) | 128);
-                    utftext += String.fromCharCode((c & 63) | 128);
-                }
-
-            }
-
-            return utftext;
-        }*/
-
-        var x = [],
-        k,
-        AA,
-        BB,
-        CC,
-        DD,
-        a,
-        b,
-        c,
-        d,
-        rnd = strhex('67452301efcdab8998badcfe10325476d76aa478e8c7b756242070dbc1bdceeef57c0faf4787c62aa8304613fd469501698098d88b44f7afffff5bb1895cd7be6b901122fd987193a679438e49b40821f61e2562c040b340265e5a51e9b6c7aad62f105d02441453d8a1e681e7d3fbc821e1cde6c33707d6f4d50d87455a14eda9e3e905fcefa3f8676f02d98d2a4c8afffa39428771f6816d9d6122fde5380ca4beea444bdecfa9f6bb4b60bebfbc70289b7ec6eaa127fad4ef308504881d05d9d4d039e6db99e51fa27cf8c4ac5665f4292244432aff97ab9423a7fc93a039655b59c38f0ccc92ffeff47d85845dd16fa87e4ffe2ce6e0a30143144e0811a1f7537e82bd3af2352ad7d2bbeb86d391',8);
-
-        x = convertToWordArray(numArr);
-
-        a = rnd[0];
-        b = rnd[1];
-        c = rnd[2];
-        d = rnd[3];
-
-        for (k = 0; k < x.length; k += 16) {
-            AA = a;
-            BB = b;
-            CC = c;
-            DD = d;
-            a = ff(a, b, c, d, x[k + 0], 7, rnd[4]);
-            d = ff(d, a, b, c, x[k + 1], 12, rnd[5]);
-            c = ff(c, d, a, b, x[k + 2], 17, rnd[6]);
-            b = ff(b, c, d, a, x[k + 3], 22, rnd[7]);
-            a = ff(a, b, c, d, x[k + 4], 7, rnd[8]);
-            d = ff(d, a, b, c, x[k + 5], 12, rnd[9]);
-            c = ff(c, d, a, b, x[k + 6], 17, rnd[10]);
-            b = ff(b, c, d, a, x[k + 7], 22, rnd[11]);
-            a = ff(a, b, c, d, x[k + 8], 7, rnd[12]);
-            d = ff(d, a, b, c, x[k + 9], 12, rnd[13]);
-            c = ff(c, d, a, b, x[k + 10], 17, rnd[14]);
-            b = ff(b, c, d, a, x[k + 11], 22, rnd[15]);
-            a = ff(a, b, c, d, x[k + 12], 7, rnd[16]);
-            d = ff(d, a, b, c, x[k + 13], 12, rnd[17]);
-            c = ff(c, d, a, b, x[k + 14], 17, rnd[18]);
-            b = ff(b, c, d, a, x[k + 15], 22, rnd[19]);
-            a = gg(a, b, c, d, x[k + 1], 5, rnd[20]);
-            d = gg(d, a, b, c, x[k + 6], 9, rnd[21]);
-            c = gg(c, d, a, b, x[k + 11], 14, rnd[22]);
-            b = gg(b, c, d, a, x[k + 0], 20, rnd[23]);
-            a = gg(a, b, c, d, x[k + 5], 5, rnd[24]);
-            d = gg(d, a, b, c, x[k + 10], 9, rnd[25]);
-            c = gg(c, d, a, b, x[k + 15], 14, rnd[26]);
-            b = gg(b, c, d, a, x[k + 4], 20, rnd[27]);
-            a = gg(a, b, c, d, x[k + 9], 5, rnd[28]);
-            d = gg(d, a, b, c, x[k + 14], 9, rnd[29]);
-            c = gg(c, d, a, b, x[k + 3], 14, rnd[30]);
-            b = gg(b, c, d, a, x[k + 8], 20, rnd[31]);
-            a = gg(a, b, c, d, x[k + 13], 5, rnd[32]);
-            d = gg(d, a, b, c, x[k + 2], 9, rnd[33]);
-            c = gg(c, d, a, b, x[k + 7], 14, rnd[34]);
-            b = gg(b, c, d, a, x[k + 12], 20, rnd[35]);
-            a = hh(a, b, c, d, x[k + 5], 4, rnd[36]);
-            d = hh(d, a, b, c, x[k + 8], 11, rnd[37]);
-            c = hh(c, d, a, b, x[k + 11], 16, rnd[38]);
-            b = hh(b, c, d, a, x[k + 14], 23, rnd[39]);
-            a = hh(a, b, c, d, x[k + 1], 4, rnd[40]);
-            d = hh(d, a, b, c, x[k + 4], 11, rnd[41]);
-            c = hh(c, d, a, b, x[k + 7], 16, rnd[42]);
-            b = hh(b, c, d, a, x[k + 10], 23, rnd[43]);
-            a = hh(a, b, c, d, x[k + 13], 4, rnd[44]);
-            d = hh(d, a, b, c, x[k + 0], 11, rnd[45]);
-            c = hh(c, d, a, b, x[k + 3], 16, rnd[46]);
-            b = hh(b, c, d, a, x[k + 6], 23, rnd[47]);
-            a = hh(a, b, c, d, x[k + 9], 4, rnd[48]);
-            d = hh(d, a, b, c, x[k + 12], 11, rnd[49]);
-            c = hh(c, d, a, b, x[k + 15], 16, rnd[50]);
-            b = hh(b, c, d, a, x[k + 2], 23, rnd[51]);
-            a = ii(a, b, c, d, x[k + 0], 6, rnd[52]);
-            d = ii(d, a, b, c, x[k + 7], 10, rnd[53]);
-            c = ii(c, d, a, b, x[k + 14], 15, rnd[54]);
-            b = ii(b, c, d, a, x[k + 5], 21, rnd[55]);
-            a = ii(a, b, c, d, x[k + 12], 6, rnd[56]);
-            d = ii(d, a, b, c, x[k + 3], 10, rnd[57]);
-            c = ii(c, d, a, b, x[k + 10], 15, rnd[58]);
-            b = ii(b, c, d, a, x[k + 1], 21, rnd[59]);
-            a = ii(a, b, c, d, x[k + 8], 6, rnd[60]);
-            d = ii(d, a, b, c, x[k + 15], 10, rnd[61]);
-            c = ii(c, d, a, b, x[k + 6], 15, rnd[62]);
-            b = ii(b, c, d, a, x[k + 13], 21, rnd[63]);
-            a = ii(a, b, c, d, x[k + 4], 6, rnd[64]);
-            d = ii(d, a, b, c, x[k + 11], 10, rnd[65]);
-            c = ii(c, d, a, b, x[k + 2], 15, rnd[66]);
-            b = ii(b, c, d, a, x[k + 9], 21, rnd[67]);
-            a = addUnsigned(a, AA);
-            b = addUnsigned(b, BB);
-            c = addUnsigned(c, CC);
-            d = addUnsigned(d, DD);
-        }
-
-        return wordToHex(a).concat(wordToHex(b), wordToHex(c), wordToHex(d));
-    },
-
-    encString = function(plaintext, key, iv) {
-        var i;
-        plaintext = s2a(plaintext, false);
-
-        key = s2a(key, false);
-        for (i=key.length; i<32; i++){
-            key[i] = 0;
-        }
-
-        if (iv === undefined) {
-            // TODO: This is not defined anywhere... commented out...
-            // iv = genIV();
-        } else {
-            iv = s2a(iv, false);
-            for (i=iv.length; i<16; i++){
-                iv[i] = 0;
-            }
-        }
-
-        var ct = rawEncrypt(plaintext, key, iv);
-        var ret = [iv];
-        for (i=0; i<ct.length; i++){
-            ret[ret.length] = ct[i];
-        }
-        return Base64.encode(ret);
-    },
-
-    decString = function(ciphertext, key) {
-        var tmp = Base64.decode(ciphertext);
-        var iv = tmp.slice(0, 16);
-        var ct = tmp.slice(16, tmp.length);
-        var i;
-
-        key = s2a(key, false);
-        for (i=key.length; i<32; i++){
-            key[i] = 0;
-        }
-
-        var pt = rawDecrypt(ct, key, iv, false);
-        return pt;
-    },
-
-    Base64 = (function(){
-        // Takes a Nx16x1 byte array and converts it to Base64
-        var _chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
-        chars = _chars.split(''),
-        
-        encode = function(b, withBreaks) {
-            var flatArr = [],
-            b64 = '',
-            i,
-            broken_b64,
-            totalChunks = Math.floor(b.length * 16 / 3);
-            for (i = 0; i < b.length * 16; i++) {
-                flatArr.push(b[Math.floor(i / 16)][i % 16]);
-            }
-            for (i = 0; i < flatArr.length; i = i + 3) {
-                b64 += chars[flatArr[i] >> 2];
-                b64 += chars[((flatArr[i] & 3) << 4) | (flatArr[i + 1] >> 4)];
-                if ( flatArr[i + 1] !== undefined ) {
-                    b64 += chars[((flatArr[i + 1] & 15) << 2) | (flatArr[i + 2] >> 6)];
-                } else {
-                    b64 += '=';
-                }
-                if ( flatArr[i + 2] !== undefined ) {
-                    b64 += chars[flatArr[i + 2] & 63];
-                } else {
-                    b64 += '=';
-                }
-            }
-            // OpenSSL is super particular about line breaks
-            broken_b64 = b64.slice(0, 64) + '\n';
-            for (i = 1; i < (Math.ceil(b64.length / 64)); i++) {
-                broken_b64 += b64.slice(i * 64, i * 64 + 64) + (Math.ceil(b64.length / 64) === i + 1 ? '': '\n');
-            }
-            return broken_b64;
-        },
-        
-        decode = function(string) {
-            string = string.replace(/\n/g, '');
-            var flatArr = [],
-            c = [],
-            b = [],
-            i;
-            for (i = 0; i < string.length; i = i + 4) {
-                c[0] = _chars.indexOf(string.charAt(i));
-                c[1] = _chars.indexOf(string.charAt(i + 1));
-                c[2] = _chars.indexOf(string.charAt(i + 2));
-                c[3] = _chars.indexOf(string.charAt(i + 3));
-
-                b[0] = (c[0] << 2) | (c[1] >> 4);
-                b[1] = ((c[1] & 15) << 4) | (c[2] >> 2);
-                b[2] = ((c[2] & 3) << 6) | c[3];
-                flatArr.push(b[0], b[1], b[2]);
-            }
-            flatArr = flatArr.slice(0, flatArr.length - (flatArr.length % 16));
-            return flatArr;
-        };
-        
-        //internet explorer
-        if(typeof Array.indexOf === "function") {
-            _chars = chars;
-        }
-        
-        /*
-        //other way to solve internet explorer problem
-        if(!Array.indexOf){
-            Array.prototype.indexOf = function(obj){
-                for(var i=0; i<this.length; i++){
-                    if(this[i]===obj){
-                        return i;
-                    }
-                }
-                return -1;
-            }
-        }
-        */
-        
-        
-        return {
-            "encode": encode,
-            "decode": decode
-        };
-    })();
-
-    return {
-        "size": size,
-        "h2a":h2a,
-        "expandKey":expandKey,
-        "encryptBlock":encryptBlock,
-        "decryptBlock":decryptBlock,
-        "Decrypt":Decrypt,
-        "s2a":s2a,
-        "rawEncrypt":rawEncrypt,
-        "rawDecrypt":rawDecrypt,
-        "dec":dec,
-        "openSSLKey":openSSLKey,
-        "a2h":a2h,
-        "enc":enc,
-        "Hash":{"MD5":MD5},
-        "Base64":Base64
-    };
-
-}));
-function hash (text) {
-  var obj = new jsSHA(text, "TEXT");
-  text = obj.getHash("SHA-512", "B64");
-  return text;
-}
-
-function message_setter (message){
-  var messages = document.getElementById("messages");
-  messages.className = "fading_out";
-  setTimeout(function () {
-    messages.innerHTML = message;
-    messages.className = "fading_in";
-  }, 300);
-}
-
-function hashrounds (text, rounds, message, callback) {
-  var result = text, progress, progressbar, messages, hashviewer;
-  var i = 0;
-  progressbar = document.getElementById("progress");
-  messages = document.getElementById("messages");
-  // hashviewer = document.getElementById("hash");
-  message_setter(message);
-
-  function doChunk () {
-    progress = Math.ceil(i/rounds * 100);
-    progressbar.value = progress;
-    // hashviewer.className = "hash";
-    // hashviewer.innerHTML = result.substring(1,32);
-    for (var k = 0; k < 100; k++) {
-      result = hash(result);
-      i++;
-    }
-    if (i < rounds) {
-      setTimeout(doChunk,1);
-    } else {
-      // hashviewer.className = "";
-      // hashviewer.innerHTML = "This is a CryptoMissive.";
-      callback(result);
-    }
-  }
-  return doChunk();
-}
-
-function encrypt(text, password, callback) {
-  hashrounds(password, 9000, "Encrypting plaintext...", function (key){
-    return callback(GibberishAES.enc(text, key));
-  });
-}
-
-function decrypt(text, password, callback) {
-  hashrounds(password, 9000, "Password valid. Decrypting...", function (key) {
-    return callback(GibberishAES.dec(text, key));
-  });
-}
-
-function verify_key(password, checksum, callback) {
-  hashrounds(password, 10000, "Verifying password...", function (key) {
-    return callback(key == checksum);
-  });
-}
-
-function make_checksum(password, callback) {
-  hashrounds(password, 10000,"Making checksum...", callback);
-}
-
-var body, ciphertext;
-function main_loop() {
-  var ciphertext_container;
-  body = document.getElementsByTagName("body")[0];
-  ciphertext_container = document.getElementById("ciphertext");
-  ciphertext = ciphertext_container.innerHTML.replace(/\s/g, "") ;
-  body.innerHTML = document.getElementById("password_form").innerHTML;
-}
-
-window.onload = main_loop;
-function crypto_loop (){
-  var upassword, checksum, progressbar, messages;
-  password = document.getElementById("password").value.trim();
-  checksum = document.getElementById("password_signature").innerHTML.trim();
-
-  messages = document.getElementById("messages");
-  progressbar = document.getElementById("progress");
-  verify_key(password, checksum, function (result) {
-    if (result) {
-      decrypt(ciphertext,password, function (plaintext) {
-        body.innerHTML = plaintext;
-      });
-    } else {
-      progressbar.value = 0;
-      message_setter("Incorrect password. Please try again.");
-    }
-  });
-}
-/*
- A JavaScript implementation of the SHA family of hashes, as
- defined in FIPS PUB 180-2 as well as the corresponding HMAC implementation
- as defined in FIPS PUB 198a
- Copyright Brian Turek 2008-2015
- Distributed under the BSD License
- See http://caligatio.github.com/jsSHA/ for more information
- Several functions taken from Paul Johnston
- */
-'use strict';(function(J){function w(a,b,c){var f=0,g=[0],l="",h=null,l=c||"UTF8";if("UTF8"!==l&&"UTF16BE"!==l&&"UTF16LE"!==l)throw"encoding must be UTF8, UTF16BE, or UTF16LE";if("HEX"===b){if(0!==a.length%2)throw"srcString of HEX type must be in byte increments";h=y(a);f=h.binLen;g=h.value}else if("TEXT"===b)h=z(a,l),f=h.binLen,g=h.value;else if("B64"===b)h=A(a),f=h.binLen,g=h.value;else if("BYTES"===b)h=B(a),f=h.binLen,g=h.value;else throw"inputFormat must be HEX, TEXT, B64, or BYTES";this.getHash=
-                                                  function(a,b,c,l){var h=null,d=g.slice(),n=f,p;3===arguments.length?"number"!==typeof c&&(l=c,c=1):2===arguments.length&&(c=1);if(c!==parseInt(c,10)||1>c)throw"numRounds must a integer >= 1";switch(b){case "HEX":h=D;break;case "B64":h=E;break;case "BYTES":h=F;break;default:throw"format must be HEX, B64, or BYTES";}if("SHA-384"===a)for(p=0;p<c;p+=1)d=u(d,n,a),n=384;else if("SHA-512"===a)for(p=0;p<c;p+=1)d=u(d,n,a),n=512;else throw"Chosen SHA variant is not supported";return h(d,G(l))};this.getHMAC=
-                                                  function(a,b,c,h,m){var d,n,p,r,q=[],H=[];d=null;switch(h){case "HEX":h=D;break;case "B64":h=E;break;case "BYTES":h=F;break;default:throw"outputFormat must be HEX, B64, or BYTES";}if("SHA-384"===c)n=128,r=384;else if("SHA-512"===c)n=128,r=512;else throw"Chosen SHA variant is not supported";if("HEX"===b)d=y(a),p=d.binLen,d=d.value;else if("TEXT"===b)d=z(a,l),p=d.binLen,d=d.value;else if("B64"===b)d=A(a),p=d.binLen,d=d.value;else if("BYTES"===b)d=B(a),p=d.binLen,d=d.value;else throw"inputFormat must be HEX, TEXT, B64, or BYTES";
-                                                                      a=8*n;b=n/4-1;if(n<p/8){for(d=u(d,p,c);d.length<=b;)d.push(0);d[b]&=4294967040}else if(n>p/8){for(;d.length<=b;)d.push(0);d[b]&=4294967040}for(n=0;n<=b;n+=1)q[n]=d[n]^909522486,H[n]=d[n]^1549556828;c=u(H.concat(u(q.concat(g),a+f,c)),a+r,c);return h(c,G(m))}}function m(a,b){this.a=a;this.b=b}function z(a,b){var c=[],f,g=[],l=0,h,s,m;if("UTF8"===b)for(h=0;h<a.length;h+=1)for(f=a.charCodeAt(h),g=[],128>f?g.push(f):2048>f?(g.push(192|f>>>6),g.push(128|f&63)):55296>f||57344<=f?g.push(224|f>>>12,128|f>>>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          6&63,128|f&63):(h+=1,f=65536+((f&1023)<<10|a.charCodeAt(h)&1023),g.push(240|f>>>18,128|f>>>12&63,128|f>>>6&63,128|f&63)),s=0;s<g.length;s+=1){for(m=l>>>2;c.length<=m;)c.push(0);c[m]|=g[s]<<24-l%4*8;l+=1}else if("UTF16BE"===b||"UTF16LE"===b)for(h=0;h<a.length;h+=1){f=a.charCodeAt(h);"UTF16LE"===b&&(s=f&255,f=s<<8|f>>8);for(m=l>>>2;c.length<=m;)c.push(0);c[m]|=f<<16-l%4*8;l+=2}return{value:c,binLen:8*l}}function y(a){var b=[],c=a.length,f,g,l;if(0!==c%2)throw"String of HEX type must be in byte increments";
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             for(f=0;f<c;f+=2){g=parseInt(a.substr(f,2),16);if(isNaN(g))throw"String of HEX type contains invalid characters";for(l=f>>>3;b.length<=l;)b.push(0);b[f>>>3]|=g<<24-f%8*4}return{value:b,binLen:4*c}}function B(a){var b=[],c,f,g;for(f=0;f<a.length;f+=1)c=a.charCodeAt(f),g=f>>>2,b.length<=g&&b.push(0),b[g]|=c<<24-f%4*8;return{value:b,binLen:8*a.length}}function A(a){var b=[],c=0,f,g,l,h,m;if(-1===a.search(/^[a-zA-Z0-9=+\/]+$/))throw"Invalid character in base-64 string";g=a.indexOf("=");a=a.replace(/\=/g,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "");if(-1!==g&&g<a.length)throw"Invalid '=' found in base-64 string";for(g=0;g<a.length;g+=4){m=a.substr(g,4);for(l=h=0;l<m.length;l+=1)f="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".indexOf(m[l]),h|=f<<18-6*l;for(l=0;l<m.length-1;l+=1){for(f=c>>>2;b.length<=f;)b.push(0);b[f]|=(h>>>16-8*l&255)<<24-c%4*8;c+=1}}return{value:b,binLen:8*c}}function D(a,b){var c="",f=4*a.length,g,l;for(g=0;g<f;g+=1)l=a[g>>>2]>>>8*(3-g%4),c+="0123456789abcdef".charAt(l>>>4&15)+"0123456789abcdef".charAt(l&
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           15);return b.outputUpper?c.toUpperCase():c}function E(a,b){var c="",f=4*a.length,g,l,h;for(g=0;g<f;g+=3)for(h=g+1>>>2,l=a.length<=h?0:a[h],h=g+2>>>2,h=a.length<=h?0:a[h],h=(a[g>>>2]>>>8*(3-g%4)&255)<<16|(l>>>8*(3-(g+1)%4)&255)<<8|h>>>8*(3-(g+2)%4)&255,l=0;4>l;l+=1)c=8*g+6*l<=32*a.length?c+"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charAt(h>>>6*(3-l)&63):c+b.b64Pad;return c}function F(a){var b="",c=4*a.length,f,g;for(f=0;f<c;f+=1)g=a[f>>>2]>>>8*(3-f%4)&255,b+=String.fromCharCode(g);
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         return b}function G(a){var b={outputUpper:!1,b64Pad:"="};try{a.hasOwnProperty("outputUpper")&&(b.outputUpper=a.outputUpper),a.hasOwnProperty("b64Pad")&&(b.b64Pad=a.b64Pad)}catch(c){}if("boolean"!==typeof b.outputUpper)throw"Invalid outputUpper formatting option";if("string"!==typeof b.b64Pad)throw"Invalid b64Pad formatting option";return b}function q(a,b){var c=null,c=new m(a.a,a.b);return c=32>=b?new m(c.a>>>b|c.b<<32-b&4294967295,c.b>>>b|c.a<<32-b&4294967295):new m(c.b>>>b-32|c.a<<64-b&4294967295,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 c.a>>>b-32|c.b<<64-b&4294967295)}function I(a,b){var c=null;return c=32>=b?new m(a.a>>>b,a.b>>>b|a.a<<32-b&4294967295):new m(0,a.a>>>b-32)}function K(a,b,c){return new m(a.a&b.a^~a.a&c.a,a.b&b.b^~a.b&c.b)}function L(a,b,c){return new m(a.a&b.a^a.a&c.a^b.a&c.a,a.b&b.b^a.b&c.b^b.b&c.b)}function M(a){var b=q(a,28),c=q(a,34);a=q(a,39);return new m(b.a^c.a^a.a,b.b^c.b^a.b)}function N(a){var b=q(a,14),c=q(a,18);a=q(a,41);return new m(b.a^c.a^a.a,b.b^c.b^a.b)}function O(a){var b=q(a,1),c=q(a,8);a=I(a,7);
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        return new m(b.a^c.a^a.a,b.b^c.b^a.b)}function P(a){var b=q(a,19),c=q(a,61);a=I(a,6);return new m(b.a^c.a^a.a,b.b^c.b^a.b)}function Q(a,b){var c,f,g;c=(a.b&65535)+(b.b&65535);f=(a.b>>>16)+(b.b>>>16)+(c>>>16);g=(f&65535)<<16|c&65535;c=(a.a&65535)+(b.a&65535)+(f>>>16);f=(a.a>>>16)+(b.a>>>16)+(c>>>16);return new m((f&65535)<<16|c&65535,g)}function R(a,b,c,f){var g,l,h;g=(a.b&65535)+(b.b&65535)+(c.b&65535)+(f.b&65535);l=(a.b>>>16)+(b.b>>>16)+(c.b>>>16)+(f.b>>>16)+(g>>>16);h=(l&65535)<<16|g&65535;g=(a.a&
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            65535)+(b.a&65535)+(c.a&65535)+(f.a&65535)+(l>>>16);l=(a.a>>>16)+(b.a>>>16)+(c.a>>>16)+(f.a>>>16)+(g>>>16);return new m((l&65535)<<16|g&65535,h)}function S(a,b,c,f,g){var l,h,s;l=(a.b&65535)+(b.b&65535)+(c.b&65535)+(f.b&65535)+(g.b&65535);h=(a.b>>>16)+(b.b>>>16)+(c.b>>>16)+(f.b>>>16)+(g.b>>>16)+(l>>>16);s=(h&65535)<<16|l&65535;l=(a.a&65535)+(b.a&65535)+(c.a&65535)+(f.a&65535)+(g.a&65535)+(h>>>16);h=(a.a>>>16)+(b.a>>>16)+(c.a>>>16)+(f.a>>>16)+(g.a>>>16)+(l>>>16);return new m((h&65535)<<16|l&65535,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           s)}function u(a,b,c){var f,g,l,h,s,q,u,C,v,d,n,p,r,w,H,t,y,z,A,B,D,E,F,G,e,x=[],I,k=[1116352408,1899447441,3049323471,3921009573,961987163,1508970993,2453635748,2870763221,3624381080,310598401,607225278,1426881987,1925078388,2162078206,2614888103,3248222580,3835390401,4022224774,264347078,604807628,770255983,1249150122,1555081692,1996064986,2554220882,2821834349,2952996808,3210313671,3336571891,3584528711,113926993,338241895,666307205,773529912,1294757372,1396182291,1695183700,1986661051,2177026350,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                2456956037,2730485921,2820302411,3259730800,3345764771,3516065817,3600352804,4094571909,275423344,430227734,506948616,659060556,883997877,958139571,1322822218,1537002063,1747873779,1955562222,2024104815,2227730452,2361852424,2428436474,2756734187,3204031479,3329325298];d=[3238371032,914150663,812702999,4144912697,4290775857,1750603025,1694076839,3204075428];g=[1779033703,3144134277,1013904242,2773480762,1359893119,2600822924,528734635,1541459225];if("SHA-384"===c||"SHA-512"===c)n=80,f=(b+128>>>10<<
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           5)+31,w=32,H=2,e=m,t=Q,y=R,z=S,A=O,B=P,D=M,E=N,G=L,F=K,k=[new e(k[0],3609767458),new e(k[1],602891725),new e(k[2],3964484399),new e(k[3],2173295548),new e(k[4],4081628472),new e(k[5],3053834265),new e(k[6],2937671579),new e(k[7],3664609560),new e(k[8],2734883394),new e(k[9],1164996542),new e(k[10],1323610764),new e(k[11],3590304994),new e(k[12],4068182383),new e(k[13],991336113),new e(k[14],633803317),new e(k[15],3479774868),new e(k[16],2666613458),new e(k[17],944711139),new e(k[18],2341262773),new e(k[19],
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     2007800933),new e(k[20],1495990901),new e(k[21],1856431235),new e(k[22],3175218132),new e(k[23],2198950837),new e(k[24],3999719339),new e(k[25],766784016),new e(k[26],2566594879),new e(k[27],3203337956),new e(k[28],1034457026),new e(k[29],2466948901),new e(k[30],3758326383),new e(k[31],168717936),new e(k[32],1188179964),new e(k[33],1546045734),new e(k[34],1522805485),new e(k[35],2643833823),new e(k[36],2343527390),new e(k[37],1014477480),new e(k[38],1206759142),new e(k[39],344077627),new e(k[40],
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    1290863460),new e(k[41],3158454273),new e(k[42],3505952657),new e(k[43],106217008),new e(k[44],3606008344),new e(k[45],1432725776),new e(k[46],1467031594),new e(k[47],851169720),new e(k[48],3100823752),new e(k[49],1363258195),new e(k[50],3750685593),new e(k[51],3785050280),new e(k[52],3318307427),new e(k[53],3812723403),new e(k[54],2003034995),new e(k[55],3602036899),new e(k[56],1575990012),new e(k[57],1125592928),new e(k[58],2716904306),new e(k[59],442776044),new e(k[60],593698344),new e(k[61],3733110249),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new e(k[62],2999351573),new e(k[63],3815920427),new e(3391569614,3928383900),new e(3515267271,566280711),new e(3940187606,3454069534),new e(4118630271,4000239992),new e(116418474,1914138554),new e(174292421,2731055270),new e(289380356,3203993006),new e(460393269,320620315),new e(685471733,587496836),new e(852142971,1086792851),new e(1017036298,365543100),new e(1126000580,2618297676),new e(1288033470,3409855158),new e(1501505948,4234509866),new e(1607167915,987167468),new e(1816402316,1246189591)],
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    d="SHA-384"===c?[new e(3418070365,d[0]),new e(1654270250,d[1]),new e(2438529370,d[2]),new e(355462360,d[3]),new e(1731405415,d[4]),new e(41048885895,d[5]),new e(3675008525,d[6]),new e(1203062813,d[7])]:[new e(g[0],4089235720),new e(g[1],2227873595),new e(g[2],4271175723),new e(g[3],1595750129),new e(g[4],2917565137),new e(g[5],725511199),new e(g[6],4215389547),new e(g[7],327033209)];else throw"Unexpected error in SHA-2 implementation";for(;a.length<=f;)a.push(0);a[b>>>5]|=128<<24-b%32;a[f]=b;I=a.length;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                for(p=0;p<I;p+=w){b=d[0];f=d[1];g=d[2];l=d[3];h=d[4];s=d[5];q=d[6];u=d[7];for(r=0;r<n;r+=1)16>r?(v=r*H+p,C=a.length<=v?0:a[v],v=a.length<=v+1?0:a[v+1],x[r]=new e(C,v)):x[r]=y(B(x[r-2]),x[r-7],A(x[r-15]),x[r-16]),C=z(u,E(h),F(h,s,q),k[r],x[r]),v=t(D(b),G(b,f,g)),u=q,q=s,s=h,h=t(l,C),l=g,g=f,f=b,b=t(C,v);d[0]=t(b,d[0]);d[1]=t(f,d[1]);d[2]=t(g,d[2]);d[3]=t(l,d[3]);d[4]=t(h,d[4]);d[5]=t(s,d[5]);d[6]=t(q,d[6]);d[7]=t(u,d[7])}if("SHA-384"===c)a=[d[0].a,d[0].b,d[1].a,d[1].b,d[2].a,d[2].b,d[3].a,d[3].b,d[4].a,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            d[4].b,d[5].a,d[5].b];else if("SHA-512"===c)a=[d[0].a,d[0].b,d[1].a,d[1].b,d[2].a,d[2].b,d[3].a,d[3].b,d[4].a,d[4].b,d[5].a,d[5].b,d[6].a,d[6].b,d[7].a,d[7].b];else throw"Unexpected error in SHA-2 implementation";return a}"function"===typeof define&&define.amd?define(function(){return w}):"undefined"!==typeof exports?"undefined"!==typeof module&&module.exports?module.exports=exports=w:exports=w:J.jsSHA=w})(this);
-function hash (text) {
-  var obj = new jsSHA(text, "TEXT");
-  text = obj.getHash("SHA-512", "B64");
-  return text;
-}
-
-function message_setter (message){
-  var messages = document.getElementById("messages");
-  messages.className = "fading_out";
-  setTimeout(function () {
-    messages.innerHTML = message;
-    messages.className = "fading_in";
-  }, 300);
-}
-
-function hashrounds (text, rounds, message, callback) {
-  var result = text, progress, progressbar, messages, hashviewer;
-  var i = 0;
-  progressbar = document.getElementById("progress");
-  messages = document.getElementById("messages");
-  // hashviewer = document.getElementById("hash");
-  message_setter(message);
-
-  function doChunk () {
-    progress = Math.ceil(i/rounds * 100);
-    progressbar.value = progress;
-    // hashviewer.className = "hash";
-    // hashviewer.innerHTML = result.substring(1,32);
-    for (var k = 0; k < 100; k++) {
-      result = hash(result);
-      i++;
-    }
-    if (i < rounds) {
-      setTimeout(doChunk,1);
-    } else {
-      // hashviewer.className = "";
-      // hashviewer.innerHTML = "This is a CryptoMissive.";
-      callback(result);
-    }
-  }
-  return doChunk();
-}
-
-function encrypt(text, password, callback) {
-  hashrounds(password, 9000, "Encrypting plaintext...", function (key){
-    return callback(GibberishAES.enc(text, key));
-  });
-}
-
-function decrypt(text, password, callback) {
-  hashrounds(password, 9000, "Password valid. Decrypting...", function (key) {
-    return callback(GibberishAES.dec(text, key));
-  });
-}
-
-function verify_key(password, checksum, callback) {
-  hashrounds(password, 10000, "Verifying password...", function (key) {
-    return callback(key == checksum);
-  });
-}
-
-function make_checksum(password, callback) {
-  hashrounds(password, 10000,"Making checksum...", callback);
-}
-
-var body, ciphertext;
-function main_loop() {
-  var ciphertext_container;
-  body = document.getElementsByTagName("body")[0];
-  ciphertext_container = document.getElementById("ciphertext");
-  ciphertext = ciphertext_container.innerHTML.replace(/\s/g, "") ;
-  body.innerHTML = document.getElementById("password_form").innerHTML;
-}
-
-window.onload = main_loop;
-function crypto_loop (){
-  var upassword, checksum, progressbar, messages;
-  password = document.getElementById("password").value.trim();
-  checksum = document.getElementById("password_signature").innerHTML.trim();
-
-  messages = document.getElementById("messages");
-  progressbar = document.getElementById("progress");
-  verify_key(password, checksum, function (result) {
-    if (result) {
-      decrypt(ciphertext,password, function (plaintext) {
-        body.innerHTML = plaintext;
-      });
-    } else {
-      progressbar.value = 0;
-      message_setter("Incorrect password. Please try again.");
-    }
-  });
-}
-function makeFile(message, key)
-{
-    var messageInput = '';
-    var checksum = make_checksum(key);
-    var ciphertext = encrypt(plaintext, key);
-}
 <script type="text/data" id="password_form">
-</script>
-      <div id="password_form">
-    <input type="password" id="password" placeholder="password" onkeyup="if (event.keyCode == 13) crypto_loop()"/>
-    <button id="submit" onclick="crypto_loop()">decrypt</button>
-  </div>
-    </script>
-    <script type="text/data" id="password_signature">
-      {checksum}
-    </script>
-    <script type="text/data" id="ciphertext">
-      {ciphertext}
-    </script>
-  </head>
-  <body>
-    <p>This is a CryptoMissive.</p>
-    <p>You will need to do one of the following to read its contents:</p>
-    <ul>
-      <li>Enable JavaScript in your current browser</li>
-      <li>Switch to a browser that supports JavaScript</li>
-    </ul>
-
-
-<style>
-
-  
+      <style>
   *{
   font-family: "Calibri", "Dejavu Sans", "Helvetica";
   }
@@ -1362,12 +260,36 @@ function makeFile(message, key)
   <p id="hash">
     This is a CryptoMissive.
   </p>
-  
+  <div id="password_form">
+    <input type="password" id="password" placeholder="password" onkeyup="if (event.keyCode == 13) crypto_loop()"/>
+    <button id="submit" onclick="crypto_loop()">decrypt</button>
+  </div>
   <progress max="100" value="0" id="progress"></progress>
   <p id="messages">
     Please enter a password.
   </p>
-</div> 
- </body>
+</div>
+
+    </script>
+    <script type="text/data" id="password_signature">
+      copJEWBnjUQdquQMB64UQRdDeSNM8oyv2ebg9+5VCnCMXRWiB3TJwKz0wuOlmduY/sWM+oki5m+yabGAuAgpwA==
+    </script>
+    <script type="text/data" id="ciphertext">
+      U2FsdGVkX18HRuUYMXLRzOOUWm/mpCdjs6XiYMyuNy3xgfK5Bhc6b1rnQs4JYaUn
+HGQVaitvU+s1/h6vGLBCww==
+
+    </script>
+  </head>
+  <body>
+    <p>This is a CryptoMissive.</p>
+    <p>You will need to do one of the following to read its contents:</p>
+    <ul>
+      <li>Enable JavaScript in your current browser</li>
+      <li>Switch to a browser that supports JavaScript</li>
+
+      <input type="button" onclick="main_loop()">
+    </ul>
+    </body>
+
 </html>
 
