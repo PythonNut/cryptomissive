@@ -1,13 +1,12 @@
 CryptoMissive
 =============
 
-This is a simple JS wrapper for HTML that encrypts it contents. It is useful to those who already posses a secret key.
-
+This is a simple JS wrapper for HTML that encrypts its contents. It's useful to those who already posses a secret key.
 
 Usage
 =====
 
-Producing CryptoMissives is easy, thanks to the automated Python script.
+Producing CryptoMissives is easy, thanks to the automated `python` script.
 
 ```bash
 $ git clone https://github.com/PythonNut/cryptomissive
@@ -35,6 +34,6 @@ Keys match.
 done.
 ```
 
-And behold! Your new messenger of secrecy has come into being! Navigate to that file in any modern web browser and see for yourself.
+And hark! Your new messenger of secrecy has come into being! Navigate to that file in any modern web browser and see for yourself.
 
 ![screenshot](screenshot.png)
