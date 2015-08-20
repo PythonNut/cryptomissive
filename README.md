@@ -27,8 +27,11 @@ Yo dude. This message be <em>secret</em>.
 And finally, produce the _uber secret_ message of doom and destruction!
 
 ```bash
-$ python cryptomissive_generator.py plaintext.html ciphertext.html "this secret key shall never be guessed"
+$ python cryptomissive_generator.py plaintext.html ciphertext.html
 encrypting plaintext.html ⇒ ciphertext.html...
+Please type a secret key: ***************
+Please re-enter your key: ***************
+Keys match.
 done.
 ```
 

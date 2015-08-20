@@ -2,6 +2,7 @@ import hashlib
 import base64
 import sys
 import subprocess
+import getpass
 
 def b64(text):
   text = text.encode('utf-8')
@@ -85,7 +86,16 @@ def generate_cryptomissive(infile, outfile, key):
 if __name__ == "__main__":
   infile  = sys.argv[1]
   outfile = sys.argv[2]
-  key     = sys.argv[3]
+
   print("encrypting {} ⇒ {}...".format(infile, outfile))
+
+  key1 = getpass.getpass("Please type a secret key: ")
+  key2 = getpass.getpass("Please re-enter your key: ")
+  if key1 == key2:
+    print("Keys match.")
+  else:
+    print("Keys do not match")
+    sys.exit(1)
+
   generate_cryptomissive(infile, outfile, key)
   print("done.")
