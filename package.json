@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/PythonNut/cryptomissive#readme",
   "devDependencies": {
-    "gulp": "^3.9.1"
+    "gulp": "^3.9.1",
+    "gulp-pug": "^3.0.2",
+    "pug": "^2.0.0-alpha8"
   }
 }
