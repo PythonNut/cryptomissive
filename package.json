@@ -1,0 +1,22 @@
+{
+  "name": "cryptomissive",
+  "version": "0.2.0",
+  "description": "CryptoMissive",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PythonNut/cryptomissive.git"
+  },
+  "keywords": [],
+  "author": "PythonNut",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PythonNut/cryptomissive/issues"
+  },
+  "homepage": "https://github.com/PythonNut/cryptomissive#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  }
+}
