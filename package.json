@@ -19,6 +19,7 @@
   "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-pug": "^3.0.2",
+    "gulp-stylus": "^2.3.1",
     "pug": "^2.0.0-alpha8"
   }
 }
