@@ -1,8 +1,10 @@
-var gulp   = require('gulp'),
-    gutil  = require('gulp-util'),
-    pug    = require('gulp-pug'),
-    stylus = require('gulp-stylus'),
-    ts     = require('gulp-typescript');
+var gulp    = require('gulp'),
+    gutil   = require('gulp-util'),
+    pug     = require('gulp-pug'),
+    stylus  = require('gulp-stylus'),
+    ts      = require('gulp-typescript'),
+    postcss = require('gulp-postcss'),
+    apfx    = require('autoprefixer');
 
 gulp.task('default', function () {
   gutil.log("Gulp is running!");
@@ -15,6 +17,12 @@ gulp.task('default', function () {
     .pipe(stylus({
       compress: !!gutil.env.production
     }))
+    .pipe(postcss([
+      apfx({
+      browsers: ['last 3 versions', '> 1%'],
+        remove: false
+      })
+    ]))
     .pipe(gulp.dest('dist'));
   gulp.src('source/typescript/main.ts')
     .pipe(ts({
