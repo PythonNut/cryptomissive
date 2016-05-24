@@ -11,6 +11,8 @@ var gulp     = require('gulp'),
     inliner  = require('gulp-inline-source'),
     download = require('gulp-download');
 
+var browser_sync = require('browser-sync').create();
+
 gulp.task('css', function () {
   return gulp.src('source/stylus/main.styl')
     .pipe(stylus({
@@ -62,7 +64,20 @@ gulp.task('default', ['html'], function () {
 });
 
 gulp.task('watch', function() {
+  browser_sync.init({
+    server: {
+      baseDir: "./"
+    },
+    open: false
+  });
+  gulp.run(['default'], function () {
+    gutil.log('updating browser');
+    browser_sync.reload();
+  });
   watch('source/**/*', function() {
-    gulp.run(['default']);
+    gulp.run(['default'], function () {
+      gutil.log('updating browser');
+      browser_sync.reload();
+    });
   });
 });
