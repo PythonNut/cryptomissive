@@ -1,6 +1,7 @@
 var gulp     = require('gulp'),
     merge    = require('merge-stream'),
     gutil    = require('gulp-util'),
+    watch    = require('gulp-watch'),
     concat   = require('gulp-concat'),
     pug      = require('gulp-pug'),
     stylus   = require('gulp-stylus'),
@@ -58,4 +59,10 @@ gulp.task('html', ['css', 'js'], function() {
 
 gulp.task('default', ['html'], function () {
     gutil.log("Gulp is running!");
+});
+
+gulp.task('watch', function() {
+  watch('source/**/*', function() {
+    gulp.run(['default']);
+  });
 });
