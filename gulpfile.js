@@ -28,20 +28,29 @@ gulp.task('css', function () {
 });
 
 gulp.task('js-source', function () {
-  var sodium, main;
-  sodium = download('https://raw.githubusercontent.com/jedisct1/libsodium.js/master/dist/browsers/combined/sodium.js')
-    .pipe(gulp.dest('lib'));
-  main = gulp.src('source/typescript/main.ts')
+  var libraries, main, pipes;
+  libraries = [
+    'https://raw.githubusercontent.com/jedisct1/libsodium.js/master/dist/browsers-sumo/combined/sodium.js',
+    'https://code.jquery.com/jquery-1.12.4.min.js'];
+
+  main = gulp.src('source/typescript/*.ts')
     .pipe(ts({
       noImplicitAny: true,
       out: 'main.js'
     }))
     .pipe(gulp.dest('dist'));
-  return merge(sodium, main);
+
+  pipes = [];
+  for (var library in libraries) {
+    pipes.push(download(libraries[library]).pipe(gulp.dest('lib')));
+  }
+  return merge.apply(this, [main].concat(pipes));
 });
 
 gulp.task('js', ['js-source'], function () {
-  return gulp.src(['lib/sodium.js', 'dist/main.js'])
+  return gulp.src(['lib/sodium.js',
+                   'lib/jquery-1.12.4.min.js',
+                   'dist/main.js'])
     .pipe(concat('all.js'))
     .pipe(gulp.dest('dist'));
 });
