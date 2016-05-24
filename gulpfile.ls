@@ -15,7 +15,7 @@ gulp-ls  = require 'gulp-livescript'
 browser_sync = require 'browser-sync' .create!
 
 gulp.task 'css' ->
-  gulp.src 'source/stylus/main.styl'
+  gulp.src 'source/stylus/*.styl'
     .pipe stylus {
       compress: !!gutil.env.production
     }
