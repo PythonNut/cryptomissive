@@ -4,16 +4,11 @@ var gulp    = require('gulp'),
     stylus  = require('gulp-stylus'),
     ts      = require('gulp-typescript'),
     postcss = require('gulp-postcss'),
-    apfx    = require('autoprefixer');
+    apfx    = require('autoprefixer'),
+    inliner = require('gulp-inline-source');
 
-gulp.task('default', function () {
-  gutil.log("Gulp is running!");
-  gulp.src('source/pug/index.pug')
-    .pipe(pug({
-      pretty: !gutil.env.production
-    }))
-    .pipe(gulp.dest('dist'));
-  gulp.src('source/stylus/main.styl')
+gulp.task('css', function () {
+  return gulp.src('source/stylus/main.styl')
     .pipe(stylus({
       compress: !!gutil.env.production
     }))
@@ -24,10 +19,30 @@ gulp.task('default', function () {
       })
     ]))
     .pipe(gulp.dest('dist'));
-  gulp.src('source/typescript/main.ts')
+});
+
+gulp.task('js', function () {
+  return gulp.src('source/typescript/main.ts')
     .pipe(ts({
       noImplicitAny: true,
       out: 'main.js'
     }))
     .pipe(gulp.dest('dist'));
+});
+
+gulp.task('html', ['css', 'js'], function() {
+  return gulp.src('source/pug/index.pug')
+    .pipe(pug({
+      pretty: !gutil.env.production
+    }))
+    .pipe(inliner({
+      rootpath: 'dist',
+      compress: !!gutil.env.production,
+      pretty: true
+    }))
+    .pipe(gulp.dest('dist'));
+});
+
+gulp.task('default', ['html'], function () {
+    gutil.log("Gulp is running!");
 });
