@@ -1,3 +1,5 @@
+fs       = require 'fs'
+path     = require 'path'
 gulp     = require 'gulp'
 merge    = require 'merge-stream'
 gutil    = require 'gulp-util'
@@ -41,7 +43,8 @@ gulp.task 'js-source' ->
 
   pipes = []
   for library in libraries
-    pipes.push(download library .pipe gulp.dest 'lib')
+    unless fs.existsSync path.resolve 'lib', path.basename library
+      pipes.push(download library .pipe gulp.dest 'lib')
 
   merge.apply @, [main].concat pipes
 
