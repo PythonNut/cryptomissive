@@ -10,6 +10,7 @@ postcss  = require 'gulp-postcss'
 apfx     = require 'autoprefixer'
 inliner  = require 'gulp-inline-source'
 download = require 'gulp-download'
+gulp-ls  = require 'gulp-livescript'
 
 browser_sync = require 'browser-sync' .create!
 
@@ -31,10 +32,10 @@ gulp.task 'js-source' ->
     'https://raw.githubusercontent.com/jedisct1/libsodium.js/master/dist/browsers-sumo/combined/sodium.js'
     'https://code.jquery.com/jquery-1.12.4.min.js'
   ]
-  main = gulp.src 'source/typescript/*.ts'
-    .pipe ts {
-      out: 'main.js'
-      +noImplicitAny
+
+  main = gulp.src 'source/livescript/*.ls'
+    .pipe gulp-ls {
+      +bare
     }
     .pipe gulp.dest 'dist'
 
