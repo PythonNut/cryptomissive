@@ -49,12 +49,19 @@ gulp.task 'js-source' ->
   merge.apply @, [main].concat pipes
 
 gulp.task 'js' ['js-source'] ->
-  gulp.src ['lib/sodium.js'
-            'lib/jquery-1.12.4.min.js'
-            'dist/main.js']
-    .pipe concat 'all.js'
+  pre = gulp.src [
+          'lib/jquery-1.12.4.min.js'
+          'dist/main.js']
+    .pipe concat 'pre.js'
     .pipe gulp.dest 'dist'
 
+  post = gulp.src [
+           'lib/sodium.js'
+           'lib/tinymce.min.js']
+    .pipe concat 'post.js'
+    .pipe gulp.dest 'dist'
+
+  merge(pre, post)
 gulp.task 'html' ['css' 'js'] ->
   gulp.src 'source/pug/index.pug'
     .pipe pug {
