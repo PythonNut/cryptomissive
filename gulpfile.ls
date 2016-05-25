@@ -11,7 +11,7 @@ ts       = require 'gulp-typescript'
 postcss  = require 'gulp-postcss'
 apfx     = require 'autoprefixer'
 inliner  = require 'gulp-inline-source'
-download = require 'gulp-download'
+download = require 'gulp-download-stream'
 gulp-ls  = require 'gulp-livescript'
 
 browser_sync = require 'browser-sync' .create!
