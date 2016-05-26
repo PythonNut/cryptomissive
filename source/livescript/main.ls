@@ -15,4 +15,8 @@ hash = (password, salt) ->
     sodium.crypto_pwhash_ALG_DEFAULT
   )
 
-hash "a", make_salt!
+edit = ->
+  $ 'body' .html($ '#editor_form' .html!)
+  $('#editor').summernote(height: $(window).height())
+
+$ -> edit!

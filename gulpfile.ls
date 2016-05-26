@@ -11,6 +11,7 @@ ts       = require 'gulp-typescript'
 postcss  = require 'gulp-postcss'
 apfx     = require 'autoprefixer'
 inliner  = require 'gulp-inline-source'
+inline64 = require 'gulp-inline-base64'
 download = require 'gulp-download-stream'
 gulp-ls  = require 'gulp-livescript'
 
@@ -20,12 +21,30 @@ gulp.task 'libs' ->
   libraries = [
     'https://raw.githubusercontent.com/jedisct1/libsodium.js/master/dist/browsers-sumo/combined/sodium.js'
     'https://raw.githubusercontent.com/necolas/normalize.css/master/normalize.css'
+    'https://raw.githubusercontent.com/summernote/summernote/develop/dist/summernote.js'
+    'https://raw.githubusercontent.com/summernote/summernote/develop/dist/summernote.css'
     'https://code.jquery.com/jquery-1.12.4.min.js'
+    'http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css'
+    'http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js'
+    {
+      file: 'font/summernote.eot?#iefix'
+      url: 'https://github.com/summernote/summernote/raw/develop/dist/font/summernote.eot'
+    }
+    {
+      file: 'font/summernote.ttf?ad8d7e2d177d2473aecd9b35d16211fb'
+      url: 'https://github.com/summernote/summernote/raw/develop/dist/font/summernote.ttf'
+    }
+    {
+      file: 'font/summernote.woff?ad8d7e2d177d2473aecd9b35d16211fb'
+      url: 'https://github.com/summernote/summernote/raw/develop/dist/font/summernote.woff'
+    }
   ]
 
   files = []
   for library in libraries
-    unless fs.existsSync path.resolve 'lib', path.basename library
+    name = library.file or library
+    dir = if library.file then path.dirname library.file else ''
+    unless fs.existsSync path.resolve 'lib', dir, path.basename name
       files.push(library)
 
   return download files, {+gzip} .pipe gulp.dest 'lib'
@@ -57,13 +76,21 @@ gulp.task 'build' ['js', 'css', 'libs'] ->
 
   post = gulp.src [
            'lib/sodium.js'
-           'lib/tinymce.min.js']
+           'lib/bootstrap.min.js'
+           'lib/summernote.js']
     .pipe concat 'post.js'
     .pipe gulp.dest 'dist'
 
   css = gulp.src [
           'lib/normalize.css'
+          'lib/bootstrap.min.css'
+          'lib/summernote.css'
           'dist/main.css']
+    .pipe inline64 {
+      baseDir: 'lib/'
+      maxSize: 1000000000
+      +debug
+    }
     .pipe concat 'pre.css'
     .pipe gulp.dest 'dist'
 
