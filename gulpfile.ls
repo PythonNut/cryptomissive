@@ -26,6 +26,7 @@ gulp.task 'libs' ->
     'https://code.jquery.com/jquery-1.12.4.min.js'
     'http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css'
     'http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js'
+    'https://raw.githubusercontent.com/lhorie/mithril.js/next/mithril.js'
     {
       file: 'font/summernote.eot?#iefix'
       url: 'https://github.com/summernote/summernote/raw/develop/dist/font/summernote.eot'
@@ -70,6 +71,7 @@ gulp.task 'css' ->
 gulp.task 'build' ['js', 'css', 'libs'] ->
   pre = gulp.src [
           'lib/jquery-1.12.4.min.js'
+          'lib/mithril.js'
           'dist/main.js']
     .pipe concat 'pre.js'
     .pipe gulp.dest 'dist'
