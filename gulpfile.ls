@@ -19,23 +19,23 @@ browser_sync = require 'browser-sync' .create!
 gulp.task 'libs' ->
   libraries = [
     'https://raw.githubusercontent.com/jedisct1/libsodium.js/master/dist/browsers-sumo/combined/sodium.js'
+    'https://raw.githubusercontent.com/necolas/normalize.css/master/normalize.css'
     'https://code.jquery.com/jquery-1.12.4.min.js'
   ]
 
-  pipes = []
+  files = []
   for library in libraries
     unless fs.existsSync path.resolve 'lib', path.basename library
-      pipes.push(download library, {+gzip} .pipe gulp.dest 'lib')
+      files.push(library)
 
-  stream = merge.apply @, pipes
-  stream.isEmpty! ? null : stream
+  return download files, {+gzip} .pipe gulp.dest 'lib'
 
-gulp.task 'js' ['libs'] ->
+gulp.task 'js' ->
   return gulp.src 'source/livescript/*.ls'
     .pipe gulp-ls {+bare, +no-header}
     .pipe gulp.dest 'dist'
 
-gulp.task 'css' ['libs'] ->
+gulp.task 'css' ->
   return gulp.src 'source/stylus/*.styl'
     .pipe stylus {
       compress: !!gutil.env.production
@@ -48,7 +48,7 @@ gulp.task 'css' ['libs'] ->
     ]
     .pipe gulp.dest 'dist'
 
-gulp.task 'build' ['js', 'css'] ->
+gulp.task 'build' ['js', 'css', 'libs'] ->
   pre = gulp.src [
           'lib/jquery-1.12.4.min.js'
           'dist/main.js']
@@ -61,10 +61,16 @@ gulp.task 'build' ['js', 'css'] ->
     .pipe concat 'post.js'
     .pipe gulp.dest 'dist'
 
-  merge(pre, post)
+  css = gulp.src [
+          'lib/normalize.css'
+          'dist/main.css']
+    .pipe concat 'pre.css'
+    .pipe gulp.dest 'dist'
+
+  return merge(pre, post, css)
 
 gulp.task 'html' ['build'] ->
-  gulp.src 'source/pug/index.pug'
+  return gulp.src 'source/pug/index.pug'
     .pipe pug {
       pretty: !gutil.env.production
     }
