@@ -44,7 +44,7 @@ gulp.task 'js-source' ->
   pipes = []
   for library in libraries
     unless fs.existsSync path.resolve 'lib', path.basename library
-      pipes.push(download library .pipe gulp.dest 'lib')
+      pipes.push(download library, {+gzip} .pipe gulp.dest 'lib')
 
   merge.apply @, [main].concat pipes
 
@@ -62,6 +62,7 @@ gulp.task 'js' ['js-source'] ->
     .pipe gulp.dest 'dist'
 
   merge(pre, post)
+
 gulp.task 'html' ['css' 'js'] ->
   gulp.src 'source/pug/index.pug'
     .pipe pug {
