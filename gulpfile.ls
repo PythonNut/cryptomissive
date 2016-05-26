@@ -16,8 +16,27 @@ gulp-ls  = require 'gulp-livescript'
 
 browser_sync = require 'browser-sync' .create!
 
-gulp.task 'css' ->
-  gulp.src 'source/stylus/*.styl'
+gulp.task 'libs' ->
+  libraries = [
+    'https://raw.githubusercontent.com/jedisct1/libsodium.js/master/dist/browsers-sumo/combined/sodium.js'
+    'https://code.jquery.com/jquery-1.12.4.min.js'
+  ]
+
+  pipes = []
+  for library in libraries
+    unless fs.existsSync path.resolve 'lib', path.basename library
+      pipes.push(download library, {+gzip} .pipe gulp.dest 'lib')
+
+  stream = merge.apply @, pipes
+  stream.isEmpty! ? null : stream
+
+gulp.task 'js' ['libs'] ->
+  return gulp.src 'source/livescript/*.ls'
+    .pipe gulp-ls {+bare, +no-header}
+    .pipe gulp.dest 'dist'
+
+gulp.task 'css' ['libs'] ->
+  return gulp.src 'source/stylus/*.styl'
     .pipe stylus {
       compress: !!gutil.env.production
     }
@@ -29,26 +48,7 @@ gulp.task 'css' ->
     ]
     .pipe gulp.dest 'dist'
 
-gulp.task 'js-source' ->
-  libraries = [
-    'https://raw.githubusercontent.com/jedisct1/libsodium.js/master/dist/browsers-sumo/combined/sodium.js'
-    'https://code.jquery.com/jquery-1.12.4.min.js'
-  ]
-
-  main = gulp.src 'source/livescript/*.ls'
-    .pipe gulp-ls {
-      +bare
-    }
-    .pipe gulp.dest 'dist'
-
-  pipes = []
-  for library in libraries
-    unless fs.existsSync path.resolve 'lib', path.basename library
-      pipes.push(download library, {+gzip} .pipe gulp.dest 'lib')
-
-  merge.apply @, [main].concat pipes
-
-gulp.task 'js' ['js-source'] ->
+gulp.task 'build' ['js', 'css'] ->
   pre = gulp.src [
           'lib/jquery-1.12.4.min.js'
           'dist/main.js']
@@ -63,7 +63,7 @@ gulp.task 'js' ['js-source'] ->
 
   merge(pre, post)
 
-gulp.task 'html' ['css' 'js'] ->
+gulp.task 'html' ['build'] ->
   gulp.src 'source/pug/index.pug'
     .pipe pug {
       pretty: !gutil.env.production
