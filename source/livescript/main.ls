@@ -1,19 +1,24 @@
-$ !-> $ 'body' .html($ '#main_splash' .html!)
-
 make_salt = ->
   sodium.randombytes_buf sodium.crypto_pwhash_SALTBYTES
 
 hash = (password, salt) ->
-  key = sodium.randombytes_buf sodium.crypto_box_SEEDBYTES
-  s = sodium.from_string s
   sodium.crypto_pwhash(
-    key.length,
+    sodium.crypto_secretbox_KEYBYTES,
     password,
     salt,
     sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
     sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
     sodium.crypto_pwhash_ALG_DEFAULT
   )
+
+make_nonce  = ->
+  sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES)
+
+encrypt = (message, nonce, key) ->
+  sodium.crypto_secretbox_easy(message, nonce, key)
+
+decrypt = (ciphertext, nonce, key) ->
+  sodium.crypto_secretbox_open_easy(ciphertext, nonce, key)
 
 edit = ->
   $ 'body' .html($ '#editor_form' .html!)
