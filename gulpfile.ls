@@ -3,6 +3,7 @@ path     = require 'path'
 gulp     = require 'gulp'
 merge    = require 'merge-stream'
 gutil    = require 'gulp-util'
+plumber  = require 'gulp-plumber'
 watch    = require 'gulp-watch'
 concat   = require 'gulp-concat'
 pug      = require 'gulp-pug'
@@ -52,11 +53,13 @@ gulp.task 'libs' ->
 
 gulp.task 'js' ->
   return gulp.src 'source/livescript/*.ls'
+    .pipe plumber!
     .pipe gulp-ls {+bare, +no-header}
     .pipe gulp.dest 'dist'
 
 gulp.task 'css' ->
   return gulp.src 'source/stylus/*.styl'
+    .pipe plumber!
     .pipe stylus {
       compress: !!gutil.env.production
     }
@@ -100,6 +103,7 @@ gulp.task 'build' ['js', 'css', 'libs'] ->
 
 gulp.task 'html' ['build'] ->
   return gulp.src 'source/pug/index.pug'
+    .pipe plumber!
     .pipe pug {
       pretty: !gutil.env.production
     }
