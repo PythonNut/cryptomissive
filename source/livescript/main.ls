@@ -25,3 +25,7 @@ edit = ->
   $('#editor').summernote(height: $(window).height())
 
 $ -> edit!
+dom = void
+$ ->
+  dom := document.implementation.createHTMLDocument("");
+  dom.documentElement.innerHTML = document.documentElement.innerHTML
