@@ -75,6 +75,9 @@ gulp.task 'build' ['js', 'css', 'libs'] ->
   pre = gulp.src [
           'lib/jquery-1.12.4.min.js'
           'lib/mithril.js'
+          'dist/model.js'
+          'dist/controller.js'
+          'dist/view.js'
           'dist/main.js']
     .pipe concat 'pre.js'
     .pipe gulp.dest 'dist'
