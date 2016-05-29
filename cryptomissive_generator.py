@@ -93,6 +93,7 @@ if __name__ == "__main__":
   key2 = getpass.getpass("Please re-enter your key: ")
   if key1 == key2:
     print("Keys match.")
+    key = key1
   else:
     print("Keys do not match")
     sys.exit(1)
