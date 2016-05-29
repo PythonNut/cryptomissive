@@ -4,7 +4,6 @@
 #tai@frelancelot.com
 #May 29, 2016
 
-
 import hashlib
 import base64
 import sys
