@@ -40,6 +40,7 @@ gulp.task 'libs' ->
       file: 'font/summernote.woff?ad8d7e2d177d2473aecd9b35d16211fb'
       url: 'https://github.com/summernote/summernote/raw/develop/dist/font/summernote.woff'
     }
+    'https://raw.githubusercontent.com/padolsey/operative/master/dist/operative.js'
   ]
 
   files = []
@@ -83,7 +84,7 @@ gulp.task 'build' ['js', 'css', 'libs'] ->
     .pipe gulp.dest 'dist'
 
   post = gulp.src [
-           'lib/sodium.js'
+           'lib/operative.js'
            'lib/bootstrap.min.js'
            'lib/summernote.js']
     .pipe concat 'post.js'

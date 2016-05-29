@@ -3,8 +3,17 @@ CryptoMissive.view_helpers = class
     if !init
       $(element).summernote!
 
-CryptoMissive.view = (controller)->
-  [m("button",
-     {onclick: controller.async_task.bind @},
-     controller.message!)
-   m('div', {config: CryptoMissive.view_helpers.summer_note_init})]
+CryptoMissive.view = (ctrl)->
+  [
+    m 'input[type=text]', {onkeyup: (m.withAttr 'value', ctrl.message), value: ctrl.message!}
+    m 'input[type=text]', {value: ctrl.hash_result!}
+    m 'button', {onclick: ctrl.hash}, "Click me!"
+    if ctrl.crypto_worker_ready!
+      m 'span', "ready!"
+    else
+      []
+    if ctrl.crypto_worker_running!
+      m 'span', "running..."
+    else
+      []
+  ]
