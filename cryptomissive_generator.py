@@ -1,3 +1,9 @@
+#Written by Jon Hayase
+#pythonnut@gmail.com
+#Last updated by Tai Groot
+#tai@frelancelot.com
+#May 29, 2016
+
 import hashlib
 import base64
 import sys
@@ -81,21 +87,57 @@ def generate_cryptomissive(infile, outfile, key):
 
   with open(outfile, "w") as f:
     f.write(body)
-
+def displayHelp():
+  print("This program requires between one and three arguments, provided in any order.")
+  print("\nIf only one argument is provided, the program will assume it is the infile \nand prompt you for a key, then export your encrypted file to \"encryptedFile.html.\"")
+  print("\nIf you wish to provide an outfile or key via the command line, use flags to \nspecify which is the file and which is the key:")
+  print("\n\nFor outfiles:\t--outfile\t--out\t-o")
+  print("For infiles:\t--infile\t--in\t-i")
+  print("For keys:\t--key\t\t-k\n")
 
 if __name__ == "__main__":
-  infile  = sys.argv[1]
-  outfile = sys.argv[2]
-
-  print("encrypting {} ⇒ {}...".format(infile, outfile))
-
-  key1 = getpass.getpass("Please type a secret key: ")
-  key2 = getpass.getpass("Please re-enter your key: ")
-  if key1 == key2:
-    print("Keys match.")
-  else:
-    print("Keys do not match")
+  needsKey = True
+  outfile = "encryptedFile.html"
+  if len(sys.argv) < 2:
+    print("Requires input file, run 'python3 cyrptomissive_generator.py --help' if you're stuck.")
     sys.exit(1)
+  elif len(sys.argv)==2:
+    if sys.argv[1] == "--help":
+      displayHelp()
+      sys.exit(1)
+    else:
+      infile = sys.argv[1]
+  for i in range(1,len(sys.argv)-1):
+   if sys.argv[i][0] == '-':
+      if sys.argv[i][1]=='-':
+        if sys.argv[i] == "--infile" or sys.argv[i] == "--in":
+          infile = sys.argv[i+1]
+        if sys.argv[i] == "--outfile" or sys.argv[i] == "--out":
+          outfile == sys.argv[i+1]
+        if sys.argv[i] == "--key":
+          key = sys.argv[i+1]
+          needsKey = False
+      elif sys.argv[i] == "-k":
+        needsKey = False
+        key = sys.argv[i+1]
+      elif sys.argv[i] == "-i":
+        infile = sys.argv[i+1]
+      elif sys.argv[i] == "-o":
+        outfile = sys.argv[i+1]
+  
+ 
+
+  print("encrypting {} → {}...".format(infile, outfile))
+
+  if needsKey:
+    key1 = getpass.getpass("Please type a secret key: ")
+    key2 = getpass.getpass("Please re-enter your key: ")
+    if key1 == key2:
+      print("Keys match.")
+      key = key1
+    else:
+      print("Keys do not match")
+      sys.exit(1)
 
   generate_cryptomissive(infile, outfile, key)
   print("done.")
