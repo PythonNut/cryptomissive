@@ -5,6 +5,7 @@ merge    = require 'merge-stream'
 gutil    = require 'gulp-util'
 plumber  = require 'gulp-plumber'
 watch    = require 'gulp-watch'
+clean    = require 'gulp-clean'
 concat   = require 'gulp-concat'
 pug      = require 'gulp-pug'
 stylus   = require 'gulp-stylus'
@@ -30,6 +31,10 @@ gulp.task 'libs' ->
     'https://raw.githubusercontent.com/lhorie/mithril.js/next/mithril.js'
     {
       file: 'font/summernote.eot?#iefix'
+      url: 'https://github.com/summernote/summernote/raw/develop/dist/font/summernote.eot'
+    }
+    {
+      file: 'font/summernote.eot?ad8d7e2d177d2473aecd9b35d16211fb'
       url: 'https://github.com/summernote/summernote/raw/develop/dist/font/summernote.eot'
     }
     {
@@ -136,3 +141,10 @@ gulp.task 'watch' !->
     gulp.run ['default'] !->
       gutil.log 'updating browser'
       browser_sync.reload!
+
+gulp.task 'clean' ->
+  lib = gulp.src 'lib', {-read}
+    .pipe clean!
+  dist = gulp.src 'dist', {-read}
+    .pipe clean!
+  merge lib, dist
