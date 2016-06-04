@@ -52,7 +52,7 @@ gulp.task 'libs' ->
     name = library.file or library
     dir = if library.file then path.dirname library.file else ''
     unless fs.existsSync path.resolve 'lib', dir, path.basename name
-      files.push(library)
+      files.push library
 
   return download files, {+gzip} .pipe gulp.dest 'lib'
 
@@ -107,7 +107,7 @@ gulp.task 'build' ['js', 'css', 'libs'] ->
     .pipe concat 'pre.css'
     .pipe gulp.dest 'dist'
 
-  return merge(pre, post, css)
+  return merge pre, post, css
 
 gulp.task 'html' ['build'] ->
   return gulp.src 'source/pug/index.pug'
@@ -123,7 +123,6 @@ gulp.task 'html' ['build'] ->
     .pipe gulp.dest 'dist'
 
 gulp.task 'default' ['html'] !->
-  gutil.log 'Gulp is running!'
 
 gulp.task 'watch' !->
   browser_sync.init {
