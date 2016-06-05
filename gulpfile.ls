@@ -13,7 +13,7 @@ stylus   = require 'gulp-stylus'
 postcss  = require 'gulp-postcss'
 apfx     = require 'autoprefixer'
 inliner  = require 'gulp-inline-source'
-inline64 = require 'gulp-inline-base64'
+base64   = require 'gulp-base64'
 download = require 'gulp-download-stream'
 gulp-ls  = require 'gulp-livescript'
 prettify = require 'gulp-jsbeautifier'
@@ -31,19 +31,15 @@ gulp.task 'libs' ->
     'http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js'
     'https://raw.githubusercontent.com/lhorie/mithril.js/next/mithril.js'
     {
-      file: 'font/summernote.eot?#iefix'
+      file: 'font/summernote.eot'
       url: 'https://github.com/summernote/summernote/raw/develop/dist/font/summernote.eot'
     }
     {
-      file: 'font/summernote.eot?ad8d7e2d177d2473aecd9b35d16211fb'
-      url: 'https://github.com/summernote/summernote/raw/develop/dist/font/summernote.eot'
-    }
-    {
-      file: 'font/summernote.ttf?ad8d7e2d177d2473aecd9b35d16211fb'
+      file: 'font/summernote.ttf'
       url: 'https://github.com/summernote/summernote/raw/develop/dist/font/summernote.ttf'
     }
     {
-      file: 'font/summernote.woff?ad8d7e2d177d2473aecd9b35d16211fb'
+      file: 'font/summernote.woff'
       url: 'https://github.com/summernote/summernote/raw/develop/dist/font/summernote.woff'
     }
     'https://raw.githubusercontent.com/padolsey/operative/master/dist/operative.js'
@@ -104,10 +100,9 @@ gulp.task 'build' ['js', 'css', 'libs'] ->
           'lib/summernote.css'
           'dist/main.css']
     .pipe gulp-if !gutil.env.production, prettify!
-    .pipe inline64 {
+    .pipe base64 {
       baseDir: 'lib/'
-      maxSize: 1000000000
-      +debug
+      maxImageSize: 1e20 # ∞
     }
     .pipe concat 'pre.css'
     .pipe gulp.dest 'dist'
