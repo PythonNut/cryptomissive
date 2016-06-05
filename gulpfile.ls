@@ -4,6 +4,7 @@ gulp     = require 'gulp'
 merge    = require 'merge-stream'
 gutil    = require 'gulp-util'
 plumber  = require 'gulp-plumber'
+gulp-if  = require 'gulp-if'
 watch    = require 'gulp-watch'
 clean    = require 'gulp-clean'
 concat   = require 'gulp-concat'
@@ -15,6 +16,7 @@ inliner  = require 'gulp-inline-source'
 inline64 = require 'gulp-inline-base64'
 download = require 'gulp-download-stream'
 gulp-ls  = require 'gulp-livescript'
+prettify = require 'gulp-jsbeautifier'
 
 browser_sync = require 'browser-sync' .create!
 
@@ -84,6 +86,7 @@ gulp.task 'build' ['js', 'css', 'libs'] ->
           'dist/controller.js'
           'dist/view.js'
           'dist/main.js']
+    .pipe gulp-if !gutil.env.production, prettify!
     .pipe concat 'pre.js'
     .pipe gulp.dest 'dist'
 
@@ -91,6 +94,7 @@ gulp.task 'build' ['js', 'css', 'libs'] ->
            'lib/operative.js'
            'lib/bootstrap.min.js'
            'lib/summernote.js']
+    .pipe gulp-if !gutil.env.production, prettify!
     .pipe concat 'post.js'
     .pipe gulp.dest 'dist'
 
@@ -99,6 +103,7 @@ gulp.task 'build' ['js', 'css', 'libs'] ->
           'lib/bootstrap.min.css'
           'lib/summernote.css'
           'dist/main.css']
+    .pipe gulp-if !gutil.env.production, prettify!
     .pipe inline64 {
       baseDir: 'lib/'
       maxSize: 1000000000
