@@ -17,6 +17,7 @@ base64   = require 'gulp-base64'
 download = require 'gulp-download-stream'
 gulp-ls  = require 'gulp-livescript'
 prettify = require 'gulp-jsbeautifier'
+compiler = require 'gulp-closure-compiler'
 
 browser_sync = require 'browser-sync' .create!
 
@@ -49,7 +50,7 @@ gulp.task 'build:libs' ->
   for library in libraries
     name = library.file or library
     dir = if library.file then path.dirname library.file else ''
-    unless fs.existsSync path.resolve 'lib', dir, path.basename name
+    unless fs.exists-sync path.resolve 'lib', dir, path.basename name
       files.push library
 
   return download files, {+gzip} .pipe gulp.dest 'lib'
@@ -74,7 +75,7 @@ gulp.task 'build:css' ->
     ]
     .pipe gulp.dest 'dist'
 
-gulp.task 'build:assemble' ['build:js', 'build:css', 'build:libs'] ->
+gulp.task 'build:collate' ['build:js', 'build:css', 'build:libs'] ->
   pre = gulp.src [
           'lib/jquery-1.12.4.min.js'
           'lib/mithril.js'
@@ -83,7 +84,14 @@ gulp.task 'build:assemble' ['build:js', 'build:css', 'build:libs'] ->
           'dist/view.js'
           'dist/main.js']
     .pipe gulp-if !gutil.env.production, prettify!
-    .pipe concat 'pre.js'
+    .pipe gulp-if !gutil.env.production, concat 'pre.js'
+    .pipe gulp-if !!gutil.env.production, compiler {
+      file-name: 'pre.js'
+      +continue-with-warnings
+      compiler-flags: {
+        warning_level: 'QUIET'
+      }
+    }
     .pipe gulp.dest 'dist'
 
   post = gulp.src [
@@ -91,7 +99,14 @@ gulp.task 'build:assemble' ['build:js', 'build:css', 'build:libs'] ->
            'lib/bootstrap.min.js'
            'lib/summernote.js']
     .pipe gulp-if !gutil.env.production, prettify!
-    .pipe concat 'post.js'
+    .pipe gulp-if !gutil.env.production, concat 'post.js'
+    .pipe gulp-if !!gutil.env.production, compiler {
+      file-name: 'post.js'
+      +continue-with-warnings
+      compiler-flags: {
+        warning_level: 'QUIET'
+      }
+    }
     .pipe gulp.dest 'dist'
 
   css = gulp.src [
@@ -101,15 +116,27 @@ gulp.task 'build:assemble' ['build:js', 'build:css', 'build:libs'] ->
           'dist/main.css']
     .pipe gulp-if !gutil.env.production, prettify!
     .pipe base64 {
-      baseDir: 'lib/'
-      maxImageSize: 1e20 # ∞
+      base-dir: 'lib/'
+      max-image-size: 1e20 # ∞
     }
     .pipe concat 'pre.css'
     .pipe gulp.dest 'dist'
 
-  return merge pre, post, css
+  sodium = gulp.src 'lib/sodium.js'
+    .pipe gulp-if !gutil.env.production, prettify!
+    .pipe gulp-if !!gutil.env.production, compiler {
+      file-name: 'sodium.js'
+      max-buffer: 3000
+      +continue-with-warnings
+      compiler-flags: {
+        warning_level: 'QUIET'
+      }
+    }
+    .pipe gulp.dest 'dist'
 
-gulp.task 'build' ['build:assemble'] ->
+  return merge pre, post, css, sodium
+
+gulp.task 'build' ['build:collate'] ->
   return gulp.src 'source/pug/index.pug'
     .pipe plumber!
     .pipe pug {	
@@ -127,7 +154,7 @@ gulp.task 'default' ['build'] !->
 gulp.task 'watch' !->
   browser_sync.init {
     server:
-      * baseDir: "./"
+      * base-dir: './'
     -open
   }
 
