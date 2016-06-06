@@ -20,7 +20,7 @@ prettify = require 'gulp-jsbeautifier'
 
 browser_sync = require 'browser-sync' .create!
 
-gulp.task 'libs' ->
+gulp.task 'build:libs' ->
   libraries = [
     'https://raw.githubusercontent.com/jedisct1/libsodium.js/master/dist/browsers-sumo/combined/sodium.js'
     'https://raw.githubusercontent.com/necolas/normalize.css/master/normalize.css'
@@ -54,13 +54,13 @@ gulp.task 'libs' ->
 
   return download files, {+gzip} .pipe gulp.dest 'lib'
 
-gulp.task 'js' ->
+gulp.task 'build:js' ->
   return gulp.src 'source/livescript/*.ls'
     .pipe plumber!
     .pipe gulp-ls {+bare, +no-header}
     .pipe gulp.dest 'dist'
 
-gulp.task 'css' ->
+gulp.task 'build:css' ->
   return gulp.src 'source/stylus/*.styl'
     .pipe plumber!
     .pipe stylus {
@@ -74,7 +74,7 @@ gulp.task 'css' ->
     ]
     .pipe gulp.dest 'dist'
 
-gulp.task 'build' ['js', 'css', 'libs'] ->
+gulp.task 'build:assemble' ['build:js', 'build:css', 'build:libs'] ->
   pre = gulp.src [
           'lib/jquery-1.12.4.min.js'
           'lib/mithril.js'
@@ -109,10 +109,10 @@ gulp.task 'build' ['js', 'css', 'libs'] ->
 
   return merge pre, post, css
 
-gulp.task 'html' ['build'] ->
+gulp.task 'build' ['build:assemble'] ->
   return gulp.src 'source/pug/index.pug'
     .pipe plumber!
-    .pipe pug {
+    .pipe pug {	
       pretty: !gutil.env.production
     }
     .pipe inliner {
@@ -122,7 +122,7 @@ gulp.task 'html' ['build'] ->
     }
     .pipe gulp.dest 'dist'
 
-gulp.task 'default' ['html'] !->
+gulp.task 'default' ['build'] !->
 
 gulp.task 'watch' !->
   browser_sync.init {
