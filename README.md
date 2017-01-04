@@ -1,7 +1,7 @@
 CryptoMissive
 =============
 
-This is a simple JS wrapper for HTML that encrypts its contents. It's useful to those who already posses a secret key.
+This is a simple JS wrapper for HTML that encrypts its contents. It's useful to those who already possess a secret key.
 
 Usage
 =====
@@ -26,7 +26,7 @@ Yo dude. This message be <em>secret</em>.
 And finally, produce the _uber secret_ message of doom and destruction!
 
 ```bash
-$ python cryptomissive_generator.py plaintext.html ciphertext.html
+$ python cryptomissive_generator.py -i plaintext.html -o ciphertext.html
 encrypting plaintext.html ⇒ ciphertext.html...
 Please type a secret key: ***************
 Please re-enter your key: ***************
