@@ -69,15 +69,17 @@ def decrypt(text, password):
 def generate_cryptomissive(infile, outfile, key):
   with open(infile)               as f: plaintext    = f.read()
   with open("aes.js")             as f: aes          = f.read()
+  with open("regen.js")           as f: regen        = f.read()
   with open("sha512.js")          as f: sha512       = f.read()
   with open("cryptoengine.js")    as f: cryptoengine = f.read()
   with open("form.html")          as f: form         = f.read()
   with open("cryptomissive.html") as f: body         = f.read()
+  with open("PyMigration.js")     as f: migration    = f.read()
 
   checksum = make_checksum(key)
   ciphertext = encrypt(plaintext, key)
 
-  js = aes + "\n" + sha512 + "\n" + cryptoengine + "\n"
+  js = aes + "\n" + sha512 + "\n" + cryptoengine + "\n" + regen + "\n" + migration + "\n"
   body = body.format(
     js=js ,
     checksum=checksum,
